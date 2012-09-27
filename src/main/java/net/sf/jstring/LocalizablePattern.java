@@ -1,7 +1,5 @@
 package net.sf.jstring;
 
-import org.apache.commons.lang.Validate;
-
 import java.util.Locale;
 
 /**
