@@ -3,10 +3,10 @@ package net.sf.jstring;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import java.util.Locale;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
-
-import java.util.Locale;
 
 /**
  * Test of {@link LocalizableException}.
@@ -14,14 +14,15 @@ import java.util.Locale;
  * @author Damien Coraboeuf
  */
 public class LocalizableExceptionTest {
+	
+	private static Strings strings;
 
 	/**
 	 * Loads the strings.
 	 */
 	@BeforeClass
 	public static void beforeClass() {
-        Locale.setDefault(Locale.ENGLISH);
-		JStrings.add("test.SampleStrings");
+        strings = new Strings("test.SampleStrings");
 	}
 
 	/**
@@ -32,7 +33,7 @@ public class LocalizableExceptionTest {
 		try {
 			throw new LocalizableException("sample.simple");
 		} catch (LocalizableException ex) {
-			assertEquals("Simple", ex.getMessage());
+			assertEquals("Simple", ex.getLocalizedMessage(strings, Locale.ENGLISH));
 		}
 	}
 
@@ -44,7 +45,7 @@ public class LocalizableExceptionTest {
 		try {
 			throw new LocalizableException("sample.one", "One");
 		} catch (LocalizableException ex) {
-			assertEquals("One parameter: One", ex.getMessage());
+			assertEquals("One parameter: One", ex.getLocalizedMessage(strings, Locale.ENGLISH));
 		}
 	}
 
@@ -56,7 +57,7 @@ public class LocalizableExceptionTest {
 		try {
 			throw new LocalizableException("sample.two", "One", "Two");
 		} catch (LocalizableException ex) {
-			assertEquals("Two parameters: One, Two", ex.getMessage());
+			assertEquals("Two parameters: One, Two", ex.getLocalizedMessage(strings, Locale.ENGLISH));
 		}
 	}
 
@@ -70,7 +71,7 @@ public class LocalizableExceptionTest {
 			throw new LocalizableException("sample.exception", root, "One", root
 					.getMessage());
 		} catch (LocalizableException ex) {
-			assertEquals("Exception for One: Root", ex.getMessage());
+			assertEquals("Exception for One: Root", ex.getLocalizedMessage(strings, Locale.ENGLISH));
 			assertNotNull(ex.getCause());
 			assertEquals("Root", ex.getCause().getMessage());
 		}
