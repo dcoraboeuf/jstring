@@ -1,5 +1,7 @@
 package net.sf.jstring;
 
+import net.sf.jstring.impl.DefaultStrings;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,8 +21,7 @@ public class MultiLocalizableTest {
     @Before
     public void before() {
         Locale.setDefault(Locale.ENGLISH);
-        strings = new Strings();
-        strings.add("test.SampleStrings");
+        strings = new DefaultStrings("test.SampleStrings");
     }
 
     @Test

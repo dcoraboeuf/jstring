@@ -5,11 +5,13 @@ import static org.junit.Assert.assertNull;
 
 import java.util.Locale;
 
+import net.sf.jstring.impl.DefaultStrings;
+
 import org.junit.Test;
 
 public class NonLocalizableTest {
 	
-	private final Strings strings = new Strings();
+	private final Strings strings = new DefaultStrings();
 
     @Test
     public void value_null() {
