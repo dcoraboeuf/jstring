@@ -1,24 +1,24 @@
 # Sample localized strings for unit tests
 
-# General section
 [general]
+# General section
 
-# Application title
 app.title
+	# Application title
 	en -> My favourite application
 	fr -> Mon application préférée
 
-# Home page
 [home]
+# Home page
 
-# Home page title
 home.title
+	# Home page title
 	en -> Home page
 	fr -> Page d'accueil
 	
-# Message to display on the home page
-# This is a very long message
 home.message
+	# Message to display on the home page
+	# This is a very long message
 	en -> ...
 		This is a very long message that spans on
 		several lines.
@@ -35,7 +35,7 @@ home.message
 		## Le caractère # doit être doublé au début d'une ligne.
 		...
 		
-# Placeholders are supported by name
 home.info
+	# Placeholders are supported by name
 	en -> Application version: {version}, build: {build}, {{not a parameter}}
 	

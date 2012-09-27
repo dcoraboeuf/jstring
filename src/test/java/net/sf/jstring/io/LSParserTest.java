@@ -19,7 +19,7 @@ public class LSParserTest {
 	public void parse_ok() {
 		// Parsing
 		URL url = getClass().getResource("/test/sample.ls");
-		Bundle actualBundle = new LSParser().parse(url);
+		Bundle actualBundle = new LSParser(true).parse(url);
 
 		// Builds the expected bundle
 		Bundle expectedBundle = BundleBuilder.create("sample")

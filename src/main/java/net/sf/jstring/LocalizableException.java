@@ -2,6 +2,7 @@ package net.sf.jstring;
 
 import java.util.Locale;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 
 /**
@@ -130,7 +131,7 @@ public class LocalizableException extends RuntimeException implements Localizabl
 	 */
 	@Override
 	public String getMessage() {
-		return getLocalizedMessage();
+		return String.format("[%s] %s", getCode(), StringUtils.join(parameters, ", "));
 	}
 
 	/**
