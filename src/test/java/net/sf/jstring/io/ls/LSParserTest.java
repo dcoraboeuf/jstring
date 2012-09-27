@@ -1,4 +1,4 @@
-package net.sf.jstring.io;
+package net.sf.jstring.io.ls;
 
 import static org.junit.Assert.assertEquals;
 

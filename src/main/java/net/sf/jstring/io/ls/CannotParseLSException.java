@@ -1,4 +1,4 @@
-package net.sf.jstring.io;
+package net.sf.jstring.io.ls;
 
 import java.io.IOException;
 import java.net.URL;

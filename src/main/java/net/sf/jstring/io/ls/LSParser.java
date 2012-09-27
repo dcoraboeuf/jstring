@@ -1,4 +1,4 @@
-package net.sf.jstring.io;
+package net.sf.jstring.io.ls;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.startsWith;
@@ -18,6 +18,7 @@ import net.sf.jstring.builder.BundleBuilder;
 import net.sf.jstring.builder.BundleKeyBuilder;
 import net.sf.jstring.builder.BundleSectionBuilder;
 import net.sf.jstring.builder.BundleValueBuilder;
+import net.sf.jstring.io.Parser;
 import net.sf.jstring.model.Bundle;
 import net.sf.jstring.model.BundleValue;
 
@@ -26,7 +27,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class LSParser {
+public class LSParser implements Parser {
 
 	private static final String ENCODING = "UTF-8";
 
@@ -317,6 +318,7 @@ public class LSParser {
 		this.trace = trace;
 	}
 
+	@Override
 	public Bundle parse(URL url) {
 		try {
 			InputStream in = url.openStream();
