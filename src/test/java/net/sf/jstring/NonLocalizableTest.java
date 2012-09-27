@@ -5,7 +5,7 @@ import static org.junit.Assert.assertNull;
 
 import java.util.Locale;
 
-import net.sf.jstring.impl.DefaultStrings;
+import net.sf.jstring.support.DefaultStrings;
 
 import org.junit.Test;
 

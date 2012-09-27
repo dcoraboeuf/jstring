@@ -1,4 +1,4 @@
-package net.sf.jstring.impl;
+package net.sf.jstring.support;
 
 import java.text.MessageFormat;
 import java.util.Collection;
