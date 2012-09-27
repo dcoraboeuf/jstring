@@ -22,6 +22,10 @@ public class BundleSectionBuilder extends Builder<BundleSection> {
 		this.name = name;
 	}
 	
+	public String getName() {
+		return name;
+	}
+	
 	public BundleSectionBuilder comment (String comment) {
 		comments.add(comment);
 		return this;

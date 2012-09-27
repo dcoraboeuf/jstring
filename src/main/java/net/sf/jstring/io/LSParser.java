@@ -21,6 +21,7 @@ import net.sf.jstring.builder.BundleValueBuilder;
 import net.sf.jstring.model.Bundle;
 import net.sf.jstring.model.BundleValue;
 
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -79,6 +80,11 @@ public class LSParser {
 					}
 				}
 			}
+			
+			@Override
+			public String toString() {
+				return "[top]";
+			}
 
 		}
 
@@ -114,6 +120,11 @@ public class LSParser {
 			@Override
 			public void close() {
 				bundleBuilder.section(sectionBuilder.build());
+			}
+			
+			@Override
+			public String toString() {
+				return "[section] " + sectionBuilder.getName();
 			}
 
 		}
@@ -170,6 +181,11 @@ public class LSParser {
 			public void close() {
 				sectionBuilder.key(keyBuilder.build());
 			}
+			
+			@Override
+			public String toString() {
+				return "[key] " + keyBuilder.getName();
+			}
 
 		}
 
@@ -195,13 +211,21 @@ public class LSParser {
 				} else if (isComment(line)) {
 					valueBuilder.comment(trimComment(line));
 				} else {
-					valueBuilder.value(line);
+					// Resolve the escaping
+					String value = StringEscapeUtils.unescapeJava(line);
+					// Adding the value
+					valueBuilder.value(value);
 				}
 			}
 			
 			@Override
 			public void close() {
 				keyBuilder.value(language, valueBuilder.build());
+			}
+			
+			@Override
+			public String toString() {
+				return "[value] " + language;
 			}
 
 		}
@@ -242,6 +266,7 @@ public class LSParser {
 		}
 
 		public Bundle build() {
+			closeUntil(TopParsingConsumer.class);
 			return bundleBuilder.build();
 		}
 
@@ -250,8 +275,7 @@ public class LSParser {
 		}
 
 		public String getConsumerName() {
-			// TODO Auto-generated method stub
-			return null;
+			return consumerStack.peek().toString();
 		}
 
 	}

@@ -24,6 +24,10 @@ public class BundleKeyBuilder extends Builder<BundleKey> {
 	private BundleKeyBuilder(String name) {
 		this.name = name;
 	}
+	
+	public String getName() {
+		return name;
+	}
 
 	public BundleKeyBuilder comment(String comment) {
 		comments.add(comment);

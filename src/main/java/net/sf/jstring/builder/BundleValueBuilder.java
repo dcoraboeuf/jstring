@@ -25,6 +25,9 @@ public class BundleValueBuilder extends Builder<BundleValue> {
 	}
 	
 	public BundleValueBuilder value (String text) {
+		if (value.length() > 0) {
+			value.append(" ");
+		}
 		value.append(text);
 		return this;
 	}

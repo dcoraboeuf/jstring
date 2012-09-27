@@ -56,7 +56,7 @@ public class LSParserTest {
 								.build())
 						.key(BundleKeyBuilder.create("home.info")
 								.comment("Placeholders are supported by name")
-								.value("en", BundleValue.value(" Application version: {version}, build: {build}, {{not a parameter}}"))
+								.value("en", BundleValue.value("Application version: {version}, build: {build}, {{not a parameter}}"))
 								.build())
 						.build())
 				.build();
