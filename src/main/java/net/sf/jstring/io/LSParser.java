@@ -10,13 +10,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.sf.jstring.builder.BundleBuilder;
 import net.sf.jstring.builder.BundleKeyBuilder;
 import net.sf.jstring.builder.BundleSectionBuilder;
+import net.sf.jstring.builder.BundleValueBuilder;
 import net.sf.jstring.model.Bundle;
+import net.sf.jstring.model.BundleValue;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -25,14 +28,19 @@ import org.slf4j.LoggerFactory;
 public class LSParser {
 
 	private static final String ENCODING = "UTF-8";
-	
+
 	private static final String COMMENT_PREFIX = "#";
+	private static final String ESCAPED_COMMENT_PREFIX = "##";
+	private static final String MULTILINE_SEPARATOR = "...";
+
 	private static final Pattern SECTION_PATTERN = Pattern.compile("^\\[(.*)\\]$");
 	private static final Pattern LANGUAGE_VALUE_PATTERN = Pattern.compile("^(.+)\\->(.*)$");
 
 	private static interface ParsingConsumer {
 
-		void consume(ParsingContext parsingContext, String line, int lineNo);
+		void consume(String line, int lineNo);
+
+		void close();
 
 	}
 
@@ -40,152 +48,210 @@ public class LSParser {
 
 	}
 
-	private static class TopParsingConsumer extends AbstractParsingConsumer {
+	private class ParsingContext {
 
-		@Override
-		public void consume(ParsingContext parsingContext, String line, int lineNo) {
-			if (isEmpty(line)) {
-				// Does nothing
-			} else if (isComment(line)) {
-				parsingContext.getBundleBuilder().comment(trimComment(line));
-			} else {
-				// Section
-				String section;
-				if ((section = getSectionHeader(line)) != null) {
-					// Starts a section
-					parsingContext.newSection (section);
+		private class TopParsingConsumer extends AbstractParsingConsumer {
+
+			private final BundleBuilder bundleBuilder;
+
+			private TopParsingConsumer(BundleBuilder bundleBuilder) {
+				this.bundleBuilder = bundleBuilder;
+			}
+			
+			@Override
+			public void close() {
+			}
+
+			@Override
+			public void consume(String line, int lineNo) {
+				if (isEmpty(line)) {
+					// Does nothing
+				} else if (isComment(line)) {
+					bundleBuilder.comment(trimComment(line));
 				} else {
-					// Plain line, what to do with that?
-					parsingContext.error (line, lineNo, "A blank line, comment or section is expected.");
+					// Section
+					String section;
+					if ((section = getSectionHeader(line)) != null) {
+						// Starts a section
+						newSection(section);
+					} else {
+						// FIXME Default section
+					}
 				}
 			}
+
 		}
 
-	}
-	
-	private static class SectionParsingConsumer extends AbstractParsingConsumer {
+		private class SectionParsingConsumer extends AbstractParsingConsumer {
 
-		@Override
-		public void consume(ParsingContext parsingContext, String line, int lineNo) {
-			if (isEmpty(line)) {
-				// Does nothing
-			} else if (isComment(line)) {
-				parsingContext.getSectionBuilder().comment(trimComment(line));
-			} else {
-				// Section
-				String section;
-				if ((section = getSectionHeader(line)) != null) {
-					// Starts a section
-					parsingContext.newSection (section);
+			private final BundleBuilder bundleBuilder;
+			private final BundleSectionBuilder sectionBuilder;
+
+			public SectionParsingConsumer(BundleBuilder bundleBuilder, String section) {
+				this.bundleBuilder = bundleBuilder;
+				this.sectionBuilder = BundleSectionBuilder.create(section);
+			}
+
+			@Override
+			public void consume(String line, int lineNo) {
+				if (isEmpty(line)) {
+					// Does nothing
+				} else if (isComment(line)) {
+					sectionBuilder.comment(trimComment(line));
 				} else {
-					// Key
-					parsingContext.newKey(line);
+					// Section
+					String section;
+					if ((section = getSectionHeader(line)) != null) {
+						// Starts a section
+						newSection(section);
+					} else {
+						// Key
+						newKey(sectionBuilder, line);
+					}
 				}
 			}
-		}
-		
-	}
-	
-	private static class KeyParsingConsumer extends AbstractParsingConsumer {
+			
+			@Override
+			public void close() {
+				bundleBuilder.section(sectionBuilder.build());
+			}
 
-		@Override
-		public void consume(ParsingContext parsingContext, String line, int lineNo) {
-			if (isEmpty(line)) {
-				// Does nothing
-			} else if (isComment(line)) {
-				parsingContext.getKeyBuilder().comment(trimComment(line));
-			} else {
-				// Section
-				String section;
-				if ((section = getSectionHeader(line)) != null) {
-					// Starts a section
-					parsingContext.newSection (section);
+		}
+
+		private class KeyParsingConsumer extends AbstractParsingConsumer {
+
+			private static final String MULTILINE_SEPARATOR = "...";
+
+			private final BundleSectionBuilder sectionBuilder;
+			private final BundleKeyBuilder keyBuilder;
+
+			public KeyParsingConsumer(BundleSectionBuilder sectionBuilder, String key) {
+				this.sectionBuilder = sectionBuilder;
+				this.keyBuilder = BundleKeyBuilder.create(key);
+			}
+
+			@Override
+			public void consume(String line, int lineNo) {
+				if (isEmpty(line)) {
+					// Does nothing
+				} else if (isComment(line)) {
+					keyBuilder.comment(trimComment(line));
 				} else {
-					// FIXME Language & value
+					// Section
+					String section;
+					if ((section = getSectionHeader(line)) != null) {
+						// Starts a section
+						newSection(section);
+					} else {
+						// Language & value
+						Matcher m = LANGUAGE_VALUE_PATTERN.matcher(line);
+						if (m.matches()) {
+							String language = trim(m.group(1));
+							String value = trim(m.group(2));
+							// ... special value, that indicates that the value
+							// is stored on several lines
+							if (MULTILINE_SEPARATOR.equals(value)) {
+								// Starts the parsing of the value
+								newValue(keyBuilder, language);
+							}
+							// Direct value
+							else {
+								keyBuilder.value(language, BundleValue.value(value));
+							}
+						} else {
+							// Any other, that is another key
+							newKey(sectionBuilder, line);
+						}
+					}
 				}
 			}
-		}
-		
-	}
+			
+			@Override
+			public void close() {
+				sectionBuilder.key(keyBuilder.build());
+			}
 
-	private static class ParsingContext {
+		}
+
+		private class ValueParsingConsumer extends AbstractParsingConsumer {
+			
+			private final BundleKeyBuilder keyBuilder;
+			private final String language;
+			private final BundleValueBuilder valueBuilder;
+
+			public ValueParsingConsumer(BundleKeyBuilder keyBuilder, String language) {
+				this.keyBuilder = keyBuilder;
+				this.language = language;
+				this.valueBuilder = BundleValueBuilder.create();
+			}
+
+			@Override
+			public void consume(String line, int lineNo) {
+				if (MULTILINE_SEPARATOR.equals(line)) {
+					// End of the value
+					quitValue();
+				} else if (isEscapedComment(line)) {
+					valueBuilder.value(trimComment(line));
+				} else if (isComment(line)) {
+					valueBuilder.comment(trimComment(line));
+				} else {
+					valueBuilder.value(line);
+				}
+			}
+			
+			@Override
+			public void close() {
+				keyBuilder.value(language, valueBuilder.build());
+			}
+
+		}
 
 		private final BundleBuilder bundleBuilder;
-		
-		private ParsingConsumer parsingConsumer = new TopParsingConsumer();
 
-		private BundleSectionBuilder sectionBuilder;	
-		private BundleKeyBuilder keyBuilder;		
+		private final Stack<ParsingConsumer> consumerStack = new Stack<LSParser.ParsingConsumer>();
 
 		public ParsingContext(String name) {
 			bundleBuilder = BundleBuilder.create(name);
+			consumerStack.push(new TopParsingConsumer(bundleBuilder));
 		}
 
-		public void error(String line, int lineNo, String message) {
-			throw new LSParsingException (line, lineNo, message);
+		protected void closeUntil(Class<? extends ParsingConsumer> consumerClass) {
+			while (!consumerClass.isInstance(consumerStack.peek())) {
+				ParsingConsumer consumer = consumerStack.pop();
+				consumer.close();
+			}
 		}
 
 		public void newSection(String section) {
-			if (sectionBuilder != null) {
-				if (keyBuilder != null) {
-					sectionBuilder.key(keyBuilder.build());
-				}
-				bundleBuilder.section(sectionBuilder.build());
-			}
-			sectionBuilder = BundleSectionBuilder.create(section);
-			parsingConsumer = new SectionParsingConsumer();
+			closeUntil(TopParsingConsumer.class);
+			consumerStack.push(new SectionParsingConsumer(bundleBuilder, section));
 		}
 
-		public void newKey(String key) {
-			if (keyBuilder != null) {
-				sectionBuilder.key(keyBuilder.build());
-			}
-			keyBuilder = BundleKeyBuilder.create(key);
-			parsingConsumer = new KeyParsingConsumer();
+		public void newKey(BundleSectionBuilder sectionBuilder, String key) {
+			closeUntil(SectionParsingConsumer.class);
+			consumerStack.push(new KeyParsingConsumer(sectionBuilder, key));
 		}
 
-		public BundleBuilder getBundleBuilder() {
-			return bundleBuilder;
-		}
-		
-		public BundleSectionBuilder getSectionBuilder() {
-			if (sectionBuilder == null) {
-				throw new IllegalStateException("No section is currently built");
-			}
-			return sectionBuilder;
-		}
-		
-		public BundleKeyBuilder getKeyBuilder() {
-			if (keyBuilder == null) {
-				throw new IllegalStateException("No key is currently built");
-			}
-			return keyBuilder;
+		public void newValue(BundleKeyBuilder keyBuilder, String language) {
+			closeUntil(KeyParsingConsumer.class);
+			consumerStack.push(new ValueParsingConsumer(keyBuilder, language));
 		}
 
-		public void consume(String line, int lineNo) {
-			parsingConsumer.consume(this, line, lineNo);
+		public void quitValue() {
+			closeUntil(KeyParsingConsumer.class);
 		}
 
 		public Bundle build() {
-			close();
-			// OK
 			return bundleBuilder.build();
 		}
 
-		protected void close() {
-			// TODO Closes the value
-			// Closes the key
-			if (keyBuilder != null) {
-				sectionBuilder.key(keyBuilder.build());
-			}
-			// Closes the section
-			if (sectionBuilder != null) {
-				bundleBuilder.section(sectionBuilder.build());
-			}
+		public void consume(String line, int lineNo) {
+			consumerStack.peek().consume(line, lineNo);
 		}
 
 		public String getConsumerName() {
-			return parsingConsumer.getClass().getSimpleName();
+			// TODO Auto-generated method stub
+			return null;
 		}
 
 	}
@@ -207,18 +273,22 @@ public class LSParser {
 		return trim(substring(line, COMMENT_PREFIX.length()));
 	}
 
+	protected static boolean isEscapedComment(String line) {
+		return startsWith(line, ESCAPED_COMMENT_PREFIX);
+	}
+
 	protected static boolean isComment(String line) {
 		return startsWith(line, COMMENT_PREFIX);
 	}
-	
+
 	private final Logger logger = LoggerFactory.getLogger(LSParser.class);
-	
+
 	private final boolean trace;
-	
+
 	public LSParser() {
 		this(false);
 	}
-	
+
 	public LSParser(boolean trace) {
 		this.trace = trace;
 	}
@@ -227,13 +297,21 @@ public class LSParser {
 		try {
 			InputStream in = url.openStream();
 			try {
-				return parse(url.getFile(), in);
+				return parse(getBundleName(url), in);
 			} finally {
 				in.close();
 			}
 		} catch (IOException ex) {
 			throw new CannotParseLSException(url, ex);
 		}
+	}
+
+	protected String getBundleName(URL url) {
+		String path = url.getFile();
+		path = StringUtils.replace(path, "\\", "/");
+		path = StringUtils.substringAfterLast(path, "/");
+		path = StringUtils.substringBeforeLast(path, ".");
+		return path;
 	}
 
 	protected Bundle parse(String name, InputStream in) throws IOException {
@@ -253,7 +331,7 @@ public class LSParser {
 
 	protected void consume(ParsingContext ctx, String line, int lineNo) {
 		if (trace) {
-			logger.debug("[{}] {} --> {}", new Object[]{lineNo, ctx.getConsumerName(), line });
+			logger.debug("[{}] {} --> {}", new Object[] { lineNo, ctx.getConsumerName(), line });
 		}
 		ctx.consume(StringUtils.trim(line), lineNo);
 	}

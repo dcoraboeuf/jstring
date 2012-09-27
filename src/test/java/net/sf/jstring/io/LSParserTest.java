@@ -42,8 +42,17 @@ public class LSParserTest {
 						.key(BundleKeyBuilder.create("home.message")
 								.comment("Message to display on the home page")
 								.comment("This is a very long message")
-								.value("en", BundleValueBuilder.create("This is a very long message that spans on several lines. Carriage returns are introduced using the normal \n Java escaping. Other ones are ignored. # The # character must be escaped at the beginning.").comment("Comments are supported in the middle of the text").build())
-								.value("fr", BundleValueBuilder.create("Ceci est un très long message qui s'étend sur plusieurs lignes. Les retours chariot sont notifiés grâce au \n Java. Les autres sont ignorés. # Le caractère # doit être doublé au début d'une ligne.").build())
+								.value("en", BundleValueBuilder.create()
+										.value("This is a very long message that spans on several lines.")
+										.value("Carriage returns are introduced using the normal \n Java escaping.")
+										.value("Other ones are ignored. # The # character must be escaped at the beginning.")
+										.comment("Comments are supported in the middle of the text")
+										.build())
+								.value("fr", BundleValueBuilder.create()
+										.value("Ceci est un très long message qui s'étend sur plusieurs lignes.")
+										.value("Les retours chariot sont notifiés grâce au \n Java.")
+										.value("Les autres sont ignorés. # Le caractère # doit être doublé au début d'une ligne.")
+										.build())
 								.build())
 						.key(BundleKeyBuilder.create("home.info")
 								.comment("Placeholders are supported by name")
@@ -52,8 +61,8 @@ public class LSParserTest {
 						.build())
 				.build();
 
-		// Compares the bundles
-		assertEquals(expectedBundle, actualBundle);
+		// Compares the bundles (at string level)
+		assertEquals(expectedBundle.toString(), actualBundle.toString());
 	}
 
 }

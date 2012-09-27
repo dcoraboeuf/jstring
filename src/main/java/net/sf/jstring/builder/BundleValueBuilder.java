@@ -9,25 +9,29 @@ import com.google.common.collect.ImmutableList;
 
 public class BundleValueBuilder extends Builder<BundleValue> {
 
-	public static BundleValueBuilder create(String name) {
-		return new BundleValueBuilder(name);
+	public static BundleValueBuilder create() {
+		return new BundleValueBuilder();
 	}
 
-	private final String value;
+	private final StringBuilder value = new StringBuilder();
 	private final List<String> comments = new ArrayList<String>();
 
-	private BundleValueBuilder(String value) {
-		this.value = value;
+	private BundleValueBuilder() {
 	}
 
 	public BundleValueBuilder comment(String comment) {
 		comments.add(comment);
 		return this;
 	}
+	
+	public BundleValueBuilder value (String text) {
+		value.append(text);
+		return this;
+	}
 
 	@Override
 	public BundleValue build() {
-		return new BundleValue(ImmutableList.copyOf(comments), value);
+		return new BundleValue(ImmutableList.copyOf(comments), value.toString());
 	}
 
 }
