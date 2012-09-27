@@ -23,7 +23,7 @@
 		</developer>
 	</developers>
 
-	<url>http://sourceforge.net/projects/jstring</url>
+	<url>https://github.com/dcoraboeuf/jstring</url>
 	
 	<licenses>
 		<license>
@@ -34,9 +34,9 @@
 	</licenses>
 	
 	<scm>
-		<connection>scm:hg:http://jstring.hg.sourceforge.net:8000/hgroot/jstring/jstring</connection>
-		<developerConnection>scm:hg:ssh://jstring.hg.sourceforge.net/hgroot/jstring/jstring</developerConnection>
-		<url>http://jstring.hg.sourceforge.net:8000/hgroot/jstring/jstring</url>
+		<connection>scm:git:git@github.com:dcoraboeuf/jstring.git</connection>
+		<url>scm:git:git@github.com:dcoraboeuf/jstring.git</url>
+		<developerConnection>scm:git:git@github.com:dcoraboeuf/jstring.git</developerConnection>
 	</scm>
 	
 	<dependencies>
