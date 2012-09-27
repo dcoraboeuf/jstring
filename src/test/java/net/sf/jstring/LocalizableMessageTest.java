@@ -1,13 +1,15 @@
 package net.sf.jstring;
 
-import org.junit.BeforeClass;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Locale;
 
-import static org.junit.Assert.assertEquals;
+import org.junit.BeforeClass;
+import org.junit.Test;
 
 public class LocalizableMessageTest {
+
+	private static Strings strings;
 
 	/**
 	 * Loads the strings.
@@ -15,7 +17,7 @@ public class LocalizableMessageTest {
 	@BeforeClass
 	public static void beforeClass() {
         Locale.setDefault(Locale.ENGLISH);
-		JStrings.add("test.SampleStrings");
+        strings = new Strings("test.SampleStrings");
 	}
 
     @Test(expected = IllegalArgumentException.class)
@@ -25,19 +27,19 @@ public class LocalizableMessageTest {
 
     @Test
     public void code_simple() {
-        String text = new LocalizableMessage("sample.simple").getLocalizedMessage(Locale.UK);
+        String text = new LocalizableMessage("sample.simple").getLocalizedMessage(strings, Locale.UK);
         assertEquals("Simple", text);
     }
 
     @Test
     public void code_one() {
-        String text = new LocalizableMessage("sample.one", "My").getLocalizedMessage(Locale.UK);
+        String text = new LocalizableMessage("sample.one", "My").getLocalizedMessage(strings, Locale.UK);
         assertEquals("One parameter: My", text);
     }
 
     @Test
     public void code_two() {
-        String text = new LocalizableMessage("sample.two", "My", "Ours").getLocalizedMessage(Locale.UK);
+        String text = new LocalizableMessage("sample.two", "My", "Ours").getLocalizedMessage(strings, Locale.UK);
         assertEquals("Two parameters: My, Ours", text);
     }
     

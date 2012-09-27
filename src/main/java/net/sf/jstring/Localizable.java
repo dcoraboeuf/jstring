@@ -11,22 +11,6 @@ import java.util.Locale;
 public interface Localizable {
 
 	/**
-	 * Returns a message that is suitable forthe default locale
-	 *
-	 * @return Message for the default locale
-	 */
-	String getLocalizedMessage();
-
-	/**
-	 * Returns a message that is suitable for the given locale
-	 * 
-	 * @param locale
-	 *            Locale to get the message for.
-	 * @return Message for the given locale
-	 */
-	String getLocalizedMessage(Locale locale);
-
-	/**
 	 * Returns a message that is suitable for the given locale
 	 *
      * @param strings Collection of bundles to use

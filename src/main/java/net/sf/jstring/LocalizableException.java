@@ -1,8 +1,8 @@
 package net.sf.jstring;
 
-import org.apache.commons.lang.Validate;
-
 import java.util.Locale;
+
+import org.apache.commons.lang.Validate;
 
 /**
  * Model for exceptions that are using a code and some parameters for their
@@ -117,19 +117,6 @@ public class LocalizableException extends RuntimeException implements Localizabl
 	 */
 	public String getCode() {
 		return this.code;
-	}
-
-	/**
-	 * @see java.lang.Throwable#getLocalizedMessage()
-	 */
-	@Override
-	public String getLocalizedMessage() {
-		return getLocalizedMessage(Locale.getDefault());
-	}
-
-	@Override
-	public String getLocalizedMessage(Locale locale) {
-		return JStrings.get(locale, getCode(), getParameters());
 	}
 
     @Override
