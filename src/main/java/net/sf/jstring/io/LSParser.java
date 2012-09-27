@@ -28,6 +28,7 @@ public class LSParser {
 	
 	private static final String COMMENT_PREFIX = "#";
 	private static final Pattern SECTION_PATTERN = Pattern.compile("^\\[(.*)\\]$");
+	private static final Pattern LANGUAGE_VALUE_PATTERN = Pattern.compile("^(.+)\\->(.*)$");
 
 	private static interface ParsingConsumer {
 
