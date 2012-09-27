@@ -2,7 +2,7 @@ package net.sf.jstring;
 
 import java.util.Locale;
 
-import org.apache.commons.lang.Validate;
+import org.apache.commons.lang3.Validate;
 
 /**
  * Model for exceptions that are using a code and some parameters for their
