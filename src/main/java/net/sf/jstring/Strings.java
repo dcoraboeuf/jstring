@@ -1,12 +1,19 @@
 package net.sf.jstring;
 
-import org.apache.commons.lang.Validate;
+import java.text.MessageFormat;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.LinkedList;
+import java.util.Locale;
+import java.util.Map;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
+import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
+
+import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.text.MessageFormat;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * String server.
