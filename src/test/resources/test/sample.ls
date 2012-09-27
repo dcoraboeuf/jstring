@@ -17,6 +17,7 @@ home.title
 	fr -> Page d'accueil
 	
 # Message to display on the home page
+# This is a very long message
 home.message
 	en -> ...
 		This is a very long message that spans on
