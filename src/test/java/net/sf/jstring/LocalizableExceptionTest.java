@@ -5,6 +5,8 @@ import static org.junit.Assert.assertNotNull;
 
 import java.util.Locale;
 
+import net.sf.jstring.impl.DefaultStrings;
+
 import org.junit.BeforeClass;
 import org.junit.Test;
 
@@ -22,7 +24,7 @@ public class LocalizableExceptionTest {
 	 */
 	@BeforeClass
 	public static void beforeClass() {
-        strings = new Strings("test.SampleStrings");
+        strings = new DefaultStrings("test.SampleStrings");
 	}
 
 	/**

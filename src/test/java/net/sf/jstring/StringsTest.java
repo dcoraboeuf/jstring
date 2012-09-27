@@ -1,5 +1,7 @@
 package net.sf.jstring;
 
+import net.sf.jstring.impl.DefaultStrings;
+
 import org.junit.Before;
 import org.junit.Test;
 
@@ -15,7 +17,7 @@ import static org.junit.Assert.*;
  */
 public class StringsTest {
 
-    private Strings strings;
+    private DefaultStrings strings;
 
     /**
      * Composite pattern where one argument is containing ${...}
@@ -107,7 +109,7 @@ public class StringsTest {
     @Before
     public void setUp() {
         Locale.setDefault(Locale.ENGLISH);
-        strings = new Strings("test.SampleStrings");
+        strings = new DefaultStrings("test.SampleStrings");
     }
 
     /**

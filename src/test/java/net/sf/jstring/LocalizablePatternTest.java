@@ -4,11 +4,13 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Locale;
 
+import net.sf.jstring.impl.DefaultStrings;
+
 import org.junit.Test;
 
 public class LocalizablePatternTest {
 	
-	private final Strings strings = new Strings();
+	private final Strings strings = new DefaultStrings();
 
     @Test(expected = NullPointerException.class)
     public void pattern_null() {
