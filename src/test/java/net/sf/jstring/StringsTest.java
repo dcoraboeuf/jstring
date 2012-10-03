@@ -1,6 +1,6 @@
 package net.sf.jstring;
 
-import net.sf.jstring.impl.DefaultStrings;
+import net.sf.jstring.support.DefaultStrings;
 
 import org.junit.Before;
 import org.junit.Test;
