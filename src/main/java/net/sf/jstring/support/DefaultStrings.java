@@ -1,0 +1,175 @@
+package net.sf.jstring.support;
+
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import net.sf.jstring.Fallback;
+import net.sf.jstring.Localizable;
+import net.sf.jstring.Strings;
+import net.sf.jstring.index.IndexedBundleCollection;
+
+import org.apache.commons.lang3.Validate;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
+
+/**
+ * String server.
+ *
+ * @author Damien Coraboeuf
+ */
+public class DefaultStrings implements Strings {
+	
+	/**
+	 * Substitution pattern
+	 */
+	private final Pattern substitutionPattern = Pattern.compile("@\\[(.+)\\]");  
+
+    /**
+     * Index
+     */
+    private final IndexedBundleCollection indexedBundleCollection;
+    
+    /**
+     * Fallback
+     */
+    private final Fallback fallback;
+
+    /**
+     * No bundle associated with this instance
+     */
+    public DefaultStrings(IndexedBundleCollection indexedBundleCollection) {
+    	this(indexedBundleCollection, new SubstituteFallback());
+    }
+
+    /**
+     * No bundle associated with this instance
+     */
+    public DefaultStrings(IndexedBundleCollection indexedBundleCollection, Fallback fallback) {
+    	this.indexedBundleCollection = indexedBundleCollection;
+    	this.fallback = fallback;
+    }
+    
+    @Override
+    public String get(Locale locale, Object key, Object... params) {
+    	Map<String, Object> map = new LinkedHashMap<String, Object>();
+    	for (int i = 0; i < params.length; i++) {
+			Object param = params[i];
+			map.put(String.valueOf(i), param);
+		}
+    	return get (locale, key, map);
+    }
+
+    /**
+     * Get a string using a code and some parameters.
+     *
+     * @param locale Locale to be used (default locale is <code>null</code>).
+     * @param code   Code as a non-null object. toString will be used.
+     * @param params Parameters for the string
+     * @return Corresponding string
+     * @see #get(java.util.Locale, String, boolean)
+     */
+    @Override
+    public String get(Locale locale, Object code, Map<String, ?> params) {
+    	// Validation
+        Validate.notNull(code, "The code cannot be null.");
+        // Default locale is null
+        final Locale localeToUse;
+        if (locale == null) {
+            localeToUse = Locale.getDefault();
+        } else {
+        	localeToUse = locale;
+        }
+        // Gets the code as a string
+        String key = code.toString();
+        // Gets the pattern
+        String pattern = indexedBundleCollection.getValue(localeToUse, key);
+        // Pattern not found
+        if (pattern == null) {
+        	// Fallback
+        	return fallback.whenNotFound (localeToUse, code, params);
+        }
+        // Recursivity (@[...])
+        pattern = resolve (localeToUse, pattern);
+        // Replace each parameter by its localized form if possible
+        if (params != null) {
+        	params = Maps.transformValues(params, new Function<Object, Object>() {
+        		@Override
+        		public Object apply (Object param) {
+                    if (param instanceof Localizable) {
+                        Localizable localizable = (Localizable) param;
+                        String value = localizable.getLocalizedMessage(DefaultStrings.this, localeToUse);
+                        return value;
+                    } else {
+                    	return param;
+                    }
+        		}
+			});
+        }
+        // Formats the message
+        return format (pattern, params);
+    }
+    
+    protected String resolve(Locale locale, String pattern) {
+    	Matcher matcher = substitutionPattern.matcher(pattern);
+    	StringBuffer buffer = new StringBuffer();
+    	while (matcher.find()) {
+    		String code = matcher.group(1);
+    		String replacement = get(locale, code);
+    		matcher.appendReplacement(buffer, replacement);
+    	}
+    	matcher.appendTail(buffer);
+    	return buffer.toString();
+	}
+
+	protected String format (String pattern, Map<String, ?> parameters) {
+    	// FIXME Uses a formatter defined by the instance
+    	return pattern;
+    }
+
+    /**
+     * Checks if the <code>key</code> is defined in the given
+     * <code>locale</code>.
+     *
+     * @param locale Locale to check
+     * @param code    Key to check
+     * @return <code>true</code> if the key is defined
+     */
+    @Override
+    public boolean isDefined(Locale locale, Object code) {
+    	// Validation
+        Validate.notNull(code, "The code cannot be null.");
+        // Default locale is null
+        if (locale == null) {
+            locale = Locale.getDefault();
+        }
+        // Gets the code as a string
+        String key = code.toString();
+        // Gets the pattern
+        String pattern = indexedBundleCollection.getValue(locale, key);
+        // Check
+        return pattern != null;
+    }
+
+    /**
+     * Loads a map of key/values for a locale. The returned map is sorted on keys.
+     *
+     * @param locale Locale to get the values for
+     * @return Map of key/values for this locale
+     */
+    @Override
+    public synchronized Map<String, String> getKeyValues(Locale locale) {
+        // Default locale is null
+        if (locale == null) {
+            locale = Locale.getDefault();
+        }
+        // Gets all values
+        Map<String, String> map = indexedBundleCollection.getValues (locale);
+        // OK
+        return map;
+    }
+
+}
