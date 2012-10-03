@@ -22,6 +22,17 @@ public interface Strings {
     String get(Locale locale, Object key, Object... params);
 
     /**
+     * Get a string using a code and some parameters.
+     *
+     * @param locale Locale to be used (default locale is <code>null</code>).
+     * @param key   Code of the string
+     * @param params Parameters for the string
+     * @return Corresponding string
+     * @see #get(java.util.Locale, String, boolean)
+     */
+    String get(Locale locale, Object key, Map<String, ?> params);
+
+    /**
      * Checks if the <code>key</code> is defined in the given
      * <code>locale</code>.
      *

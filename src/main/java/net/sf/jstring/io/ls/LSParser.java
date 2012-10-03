@@ -54,6 +54,7 @@ public class LSParser implements Parser {
 
 		private class TopParsingConsumer extends AbstractParsingConsumer {
 
+			private static final String SECTION_DEFAULT = "default";
 			private final BundleBuilder bundleBuilder;
 
 			private TopParsingConsumer(BundleBuilder bundleBuilder) {
@@ -77,7 +78,10 @@ public class LSParser implements Parser {
 						// Starts a section
 						newSection(section);
 					} else {
-						// FIXME Default section
+						// Default section
+						BundleSectionBuilder sectionBuilder = newSection(SECTION_DEFAULT);
+						// Starts the key
+						newKey(sectionBuilder, line);
 					}
 				}
 			}
@@ -247,9 +251,11 @@ public class LSParser implements Parser {
 			}
 		}
 
-		public void newSection(String section) {
+		public BundleSectionBuilder newSection(String section) {
 			closeUntil(TopParsingConsumer.class);
-			consumerStack.push(new SectionParsingConsumer(bundleBuilder, section));
+			SectionParsingConsumer sectionParsingConsumer = new SectionParsingConsumer(bundleBuilder, section);
+			consumerStack.push(sectionParsingConsumer);
+			return sectionParsingConsumer.sectionBuilder;
 		}
 
 		public void newKey(BundleSectionBuilder sectionBuilder, String key) {
@@ -322,10 +328,14 @@ public class LSParser implements Parser {
 	public Bundle parse(URL url) {
 		try {
 			InputStream in = url.openStream();
-			try {
-				return parse(getBundleName(url), in);
-			} finally {
-				in.close();
+			if (in == null) {
+				throw new CannotOpenLSException (url);
+			} else {
+				try {
+					return parse(getBundleName(url), in);
+				} finally {
+					in.close();
+				}
 			}
 		} catch (IOException ex) {
 			throw new CannotParseLSException(url, ex);

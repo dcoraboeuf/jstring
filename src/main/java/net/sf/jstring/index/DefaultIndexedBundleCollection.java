@@ -1,5 +1,6 @@
 package net.sf.jstring.index;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -53,6 +54,34 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 					}
 				}
 			}
+		} finally {
+			lock.unlock();
+		}
+	}
+	
+	@Override
+	public Map<String, String> getValues(Locale locale) {
+		Lock lock = indexLock.readLock();
+		lock.lock();
+		try {
+			// Result
+			Map<String, String> result = new HashMap<String, String>();
+			// List of locales
+			List<Locale> locales = LocaleUtils.localeLookupList(locale, defaultLocale);
+			// Loops in reverse order
+			Collections.reverse(locales);
+			for (Locale currentLocale : locales) {
+				// Gets the string out of the locale
+				String language = currentLocale.toString();
+				// Gets the language map
+				Map<String, String> map = index.get(language);
+				// If map is defined, includes it
+				if (map != null) {
+					result.putAll(map);
+				}
+			}
+			// OK
+			return result;
 		} finally {
 			lock.unlock();
 		}

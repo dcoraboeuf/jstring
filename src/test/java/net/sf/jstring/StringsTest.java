@@ -1,14 +1,18 @@
 package net.sf.jstring;
 
-import net.sf.jstring.support.DefaultStrings;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
-import org.junit.Before;
-import org.junit.Test;
-
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import net.sf.jstring.support.StringsLoader;
+
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Test of {@link Strings}.
@@ -17,7 +21,7 @@ import static org.junit.Assert.*;
  */
 public class StringsTest {
 
-    private DefaultStrings strings;
+    private Strings strings;
 
     /**
      * Composite pattern where one argument is containing ${...}
@@ -25,7 +29,7 @@ public class StringsTest {
     @Test
     public void testComposite() {
         String value = strings.get(null, "sample.composite");
-        assertEquals("This is version ${my.version}", value);
+        assertEquals("This is version 2.0", value);
     }
 
     /**
@@ -38,22 +42,13 @@ public class StringsTest {
     }
 
     /**
-     * Test of dollar escape
-     */
-    @Test
-    public void testDollar() {
-        String value = strings.get(null, "sample.dollar", "500");
-        assertEquals("$500", value);
-    }
-
-    /**
      * Test a mandatory string
      */
     @Test
-    public void testMandatory() {
-        String value = strings.get(null, "NoCode", true);
+    public void testNotDefinedFallback() {
+        String value = strings.get(null, "NoCode");
         assertNotNull(value);
-        assertEquals("NoCode", value);
+        assertEquals("##en#NoCode##", value);
     }
 
     /**
@@ -63,15 +58,6 @@ public class StringsTest {
     public void testNotDefined() {
         boolean defined = strings.isDefined(null, "notDefined");
         assertFalse(defined);
-    }
-
-    /**
-     * Test a non mandatory string
-     */
-    @Test
-    public void testNotMandatory() {
-        String value = strings.get(null, "NoCode", false);
-        assertNull(value);
     }
 
     /**
@@ -107,21 +93,8 @@ public class StringsTest {
      * @see junit.framework.TestCase#setUp()
      */
     @Before
-    public void setUp() {
-        Locale.setDefault(Locale.ENGLISH);
-        strings = new DefaultStrings("test.SampleStrings");
-    }
-
-    /**
-     * Lock test
-     */
-    @Test(expected = IllegalStateException.class)
-    public void lock() {
-        assertFalse(strings.isLocked());
-        strings.lock();
-        assertTrue(strings.isLocked());
-        // Tries to add
-        strings.add("any.thing");
+    public void setUp() throws IOException {
+        strings = new StringsLoader().withLocale(Locale.ENGLISH).withPaths("test/sampleStrings.ls").load();
     }
 
     /**

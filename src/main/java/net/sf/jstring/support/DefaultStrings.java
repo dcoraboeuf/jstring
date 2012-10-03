@@ -1,23 +1,20 @@
 package net.sf.jstring.support;
 
-import java.text.MessageFormat;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.LinkedList;
+import java.util.LinkedHashMap;
 import java.util.Locale;
 import java.util.Map;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-import java.util.TreeMap;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import net.sf.jstring.Fallback;
 import net.sf.jstring.Localizable;
-import net.sf.jstring.MultiResourceBundle;
 import net.sf.jstring.Strings;
+import net.sf.jstring.index.IndexedBundleCollection;
 
 import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
 
 /**
  * String server.
@@ -25,219 +22,45 @@ import org.slf4j.LoggerFactory;
  * @author Damien Coraboeuf
  */
 public class DefaultStrings implements Strings {
-    /**
-     * Logging
-     */
-    private static final Logger log = LoggerFactory.getLogger(DefaultStrings.class);
+	
+	/**
+	 * Substitution pattern
+	 */
+	private final Pattern substitutionPattern = Pattern.compile("@\\[(.+)\\]");  
 
     /**
-     * All paths
+     * Index
      */
-    private LinkedList<String> paths = new LinkedList<String>();
-
+    private final IndexedBundleCollection indexedBundleCollection;
+    
     /**
-     * List of resource bundle indexed by locales.
+     * Fallback
      */
-    private Map<Locale, ResourceBundle> resources = new ConcurrentHashMap<Locale, ResourceBundle>();
-
-    /**
-     * Custom properties, added at runtime
-     */
-    private Map<String, String> localProperties = new ConcurrentHashMap<String, String>();
-
-    /**
-     * Status of the collection of bundle.
-     */
-    private boolean locked;
+    private final Fallback fallback;
 
     /**
      * No bundle associated with this instance
      */
-    public DefaultStrings() {
+    public DefaultStrings(IndexedBundleCollection indexedBundleCollection) {
+    	this(indexedBundleCollection, new SubstituteFallback());
     }
 
     /**
-     * Pre-defined list of bundles
+     * No bundle associated with this instance
      */
-    public DefaultStrings(String... paths) {
-        for (String path : paths) {
-            add(path);
-        }
+    public DefaultStrings(IndexedBundleCollection indexedBundleCollection, Fallback fallback) {
+    	this.indexedBundleCollection = indexedBundleCollection;
+    	this.fallback = fallback;
     }
-
-    /**
-     * Pre-defined list of bundles
-     */
-    public DefaultStrings(Collection<String> paths) {
-        for (String path : paths) {
-            add(path);
-        }
-    }
-
-    /**
-     * Pre-defined list of bundles and lock
-     */
-    public DefaultStrings(boolean locked, String... paths) {
-        for (String path : paths) {
-            add(path);
-        }
-        this.locked = locked;
-    }
-
-    /**
-     * Pre-defined list of bundles and lock
-     */
-    public DefaultStrings(boolean locked, Collection<String> paths) {
-        for (String path : paths) {
-            add(path);
-        }
-        this.locked = locked;
-    }
-
-    /**
-     * Checks the status of this collection of bundles
-     *
-     * @return true if the collection cannot be extended any longer
-     */
-    public boolean isLocked() {
-        return locked;
-    }
-
-    /**
-     * Locks this collection of bundles, so it cannot be extended
-     * any longer.
-     */
-    public void lock() {
-        locked = true;
-    }
-
-    /**
-     * Checks the lock satus and raises an IllegalStateException
-     * if the collection is locked.
-     */
-    protected void lockCheck() {
-        if (locked) {
-            throw new IllegalStateException("The Strings collection is locked and cannot be extended any longer.");
-        }
-    }
-
-    /**
-     * Adds a supplementary resource path
-     *
-     * @param path Bundle's name to be added.
-     */
-    public synchronized void add(String path) {
-        lockCheck();
-        log.info("Add I18N String path " + path);
-        paths.offer(path);
-        resources.clear();
-    }
-
-    /**
-     * Adds a custom string.
-     *
-     * @param code  Code of the string
-     * @param value Value for the code
-     */
-    public synchronized void add(String code, String value) {
-        lockCheck();
-        localProperties.put(code, value);
-    }
-
-    /**
-     * Adds a supplementary resource path so it is the first one in the queue
-     *
-     * @param path Bundle's name to be added.
-     */
-    public synchronized void addFirst(String path) {
-        lockCheck();
-        log.info("Add I18N String path " + path + " at beginning");
-        paths.addFirst(path);
-        resources.clear();
-    }
-
-    /**
-     * Completes the value with other codes. It means that if the located string
-     * contains references to other codes, those ones are expanded. References
-     * are expressed using @[<i>code</i>] syntax.
-     *
-     * @param locale Locale to be used (default locale is <code>null</code>).
-     * @param value  Value to expand
-     * @return Expanded string
-     */
-    private String complete(Locale locale, String value) {
-        int pos = value.indexOf("@[");
-        if (pos >= 0) {
-            StringBuilder buffer = new StringBuilder();
-            int oldpos = 0;
-            while ((pos = value.indexOf("@[", oldpos)) >= 0) {
-                int endpos = value.indexOf(']', pos + 2);
-                if (endpos > 0) {
-                    String key = value.substring(pos + 2, endpos);
-                    String systemValue = get(locale, key);
-                    if (systemValue != null) {
-                        buffer.append(value.substring(oldpos, pos));
-                        buffer.append(systemValue);
-                        oldpos = endpos + 1;
-                    } else {
-                        buffer.append(value.substring(oldpos, endpos + 1));
-                        oldpos = endpos + 1;
-                    }
-                } else {
-                    pos = -1;
-                }
-            }
-            buffer.append(value.substring(oldpos));
-            return buffer.toString();
-        } else {
-            return value;
-        }
-    }
-
-    /**
-     * Get a string by its code
-     *
-     * @param locale    Locale to use
-     * @param code      Code as a non-null object. toString will be used.
-     * @param mandatory If the string must be found
-     * @return The string if found, <code>null</code> if not mandatory, the code
-     *         itself otherwise
-     */
-    public String get(Locale locale, Object code, boolean mandatory) {
-        Validate.notNull(code, "The code cannot be null.");
-        return get(locale, code.toString(), mandatory);
-    }
-
-    /**
-     * Get a string by its code
-     *
-     * @param locale    Locale to use
-     * @param code      Code
-     * @param mandatory If the string must be found
-     * @return The string if found, <code>null</code> if not mandatory, the code
-     *         itself otherwise
-     */
-    public String get(Locale locale, String code, boolean mandatory) {
-        // Get the local property if any
-        String localValue = localProperties.get(code);
-        if (localValue != null) {
-            return localValue;
-        }
-        // Get the associated bundle
-        ResourceBundle bundle = getBundle(locale);
-        try {
-            String value = bundle.getString(code);
-            // Value cannot be null
-            value = complete(locale, value);
-            return value;
-        } catch (MissingResourceException ex) {
-            if (mandatory) {
-                log.warn("String key not found\t" + code);
-                return code;
-            } else {
-                return null;
-            }
-        }
+    
+    @Override
+    public String get(Locale locale, Object key, Object... params) {
+    	Map<String, Object> map = new LinkedHashMap<String, Object>();
+    	for (int i = 0; i < params.length; i++) {
+			Object param = params[i];
+			map.put(String.valueOf(i), param);
+		}
+    	return get (locale, key, map);
     }
 
     /**
@@ -250,70 +73,61 @@ public class DefaultStrings implements Strings {
      * @see #get(java.util.Locale, String, boolean)
      */
     @Override
-    public String get(Locale locale, Object code, Object... params) {
+    public String get(Locale locale, Object code, Map<String, ?> params) {
+    	// Validation
         Validate.notNull(code, "The code cannot be null.");
-        return get(locale, code.toString(), params);
-    }
-
-    /**
-     * Get a string using a code and some parameters.
-     *
-     * @param locale Locale to be used (default locale is <code>null</code>).
-     * @param code   Code of the string
-     * @param params Parameters for the string
-     * @return Corresponding string
-     * @see #get(java.util.Locale, String, boolean)
-     */
-    public String get(Locale locale, String code, Object... params) {
         // Default locale is null
+        final Locale localeToUse;
         if (locale == null) {
-            locale = Locale.getDefault();
+            localeToUse = Locale.getDefault();
+        } else {
+        	localeToUse = locale;
         }
-        String pattern = get(locale, code, true);
-        if (pattern.indexOf('{') >= 0
-                && (pattern.indexOf("${") < 0 || pattern.indexOf("$${") >= 0)) {
-            // Replaces $${ by ${
-            pattern = pattern.replace("$${", "${");
-            // Replace each occurrence by its localized form if possible
-            if (params != null) {
-                for (int i = 0; i < params.length; i++) {
-                    Object param = params[i];
+        // Gets the code as a string
+        String key = code.toString();
+        // Gets the pattern
+        String pattern = indexedBundleCollection.getValue(localeToUse, key);
+        // Pattern not found
+        if (pattern == null) {
+        	// Fallback
+        	return fallback.whenNotFound (localeToUse, code, params);
+        }
+        // Recursivity (@[...])
+        pattern = resolve (localeToUse, pattern);
+        // Replace each parameter by its localized form if possible
+        if (params != null) {
+        	params = Maps.transformValues(params, new Function<Object, Object>() {
+        		@Override
+        		public Object apply (Object param) {
                     if (param instanceof Localizable) {
                         Localizable localizable = (Localizable) param;
-                        String value = localizable.getLocalizedMessage(this, locale);
-                        params[i] = value;
+                        String value = localizable.getLocalizedMessage(DefaultStrings.this, localeToUse);
+                        return value;
+                    } else {
+                    	return param;
                     }
-                }
-            }
-            // Computes message
-            MessageFormat messageFormat = new MessageFormat(pattern, locale);
-            String message = messageFormat.format(params);
-            // OK
-            return message;
-        } else {
-            return pattern;
+        		}
+			});
         }
+        // Formats the message
+        return format (pattern, params);
     }
+    
+    protected String resolve(Locale locale, String pattern) {
+    	Matcher matcher = substitutionPattern.matcher(pattern);
+    	StringBuffer buffer = new StringBuffer();
+    	while (matcher.find()) {
+    		String code = matcher.group(1);
+    		String replacement = get(locale, code);
+    		matcher.appendReplacement(buffer, replacement);
+    	}
+    	matcher.appendTail(buffer);
+    	return buffer.toString();
+	}
 
-    /**
-     * Get a bundle for a locale
-     *
-     * @param locale Locale used for the search. If <code>null</code>, default
-     *               locale is used.
-     * @return Resource bundle
-     */
-    private ResourceBundle getBundle(Locale locale) {
-        // Default locale is null
-        if (locale == null) {
-            locale = Locale.getDefault();
-        }
-        // Find in cache
-        ResourceBundle bundle = resources.get(locale);
-        if (bundle == null) {
-            return loadBundle(locale);
-        } else {
-            return bundle;
-        }
+	protected String format (String pattern, Map<String, ?> parameters) {
+    	// FIXME Uses a formatter defined by the instance
+    	return pattern;
     }
 
     /**
@@ -321,25 +135,23 @@ public class DefaultStrings implements Strings {
      * <code>locale</code>.
      *
      * @param locale Locale to check
-     * @param key    Key to check
+     * @param code    Key to check
      * @return <code>true</code> if the key is defined
      */
     @Override
-    public boolean isDefined(Locale locale, Object key) {
-        String value = get(locale, key, false);
-        return value != null;
-    }
-
-    /**
-     * Load a bundle
-     *
-     * @param locale Locale to be used.
-     * @return An instance of <code>MultiResourceBundle</code>
-     */
-    private synchronized ResourceBundle loadBundle(Locale locale) {
-        MultiResourceBundle bundle = new MultiResourceBundle(locale, paths);
-        resources.put(locale, bundle);
-        return bundle;
+    public boolean isDefined(Locale locale, Object code) {
+    	// Validation
+        Validate.notNull(code, "The code cannot be null.");
+        // Default locale is null
+        if (locale == null) {
+            locale = Locale.getDefault();
+        }
+        // Gets the code as a string
+        String key = code.toString();
+        // Gets the pattern
+        String pattern = indexedBundleCollection.getValue(locale, key);
+        // Check
+        return pattern != null;
     }
 
     /**
@@ -350,21 +162,12 @@ public class DefaultStrings implements Strings {
      */
     @Override
     public synchronized Map<String, String> getKeyValues(Locale locale) {
-        // Gets the bundle for this locale
-        ResourceBundle bundle = loadBundle(locale);
-        // Fills a map
-        Map<String, String> map = new TreeMap<String, String>();
-        Enumeration<String> keys = bundle.getKeys();
-        while (keys.hasMoreElements()) {
-            String key = keys.nextElement();
-            String value = bundle.getString(key);
-            value = complete(locale, value);
-            map.put(key, value);
+        // Default locale is null
+        if (locale == null) {
+            locale = Locale.getDefault();
         }
-        // Overrides with local properties
-        if (localProperties != null) {
-            map.putAll(localProperties);
-        }
+        // Gets all values
+        Map<String, String> map = indexedBundleCollection.getValues (locale);
         // OK
         return map;
     }
