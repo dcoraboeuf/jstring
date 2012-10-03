@@ -12,6 +12,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import net.sf.jstring.Fallback;
+import net.sf.jstring.Formatter;
 import net.sf.jstring.Strings;
 import net.sf.jstring.builder.BundleCollectionBuilder;
 import net.sf.jstring.index.DefaultIndexedBundleCollection;
@@ -38,30 +39,37 @@ public class StringsLoader {
 	private final boolean autoDiscover;
 	private final ImmutableList<String> paths;
 	private final Fallback fallback;
+	private final Formatter formatter;
 	
 	public StringsLoader() {
-		this(new SubstituteFallback(), Locale.ENGLISH, true, ImmutableList.<String>of());
+		this(new DefaultFormatter(), new SubstituteFallback(), Locale.ENGLISH, true, ImmutableList.<String>of());
 	}
 	
-	public StringsLoader(Fallback fallback, Locale defaultLocale, boolean autoDiscover, ImmutableList<String> paths) {
+	public StringsLoader(Formatter formatter, Fallback fallback, Locale defaultLocale, boolean autoDiscover, ImmutableList<String> paths) {
 		this.fallback = fallback;
+		this.formatter = formatter;
 		this.defaultLocale = defaultLocale;
 		this.autoDiscover = autoDiscover;
 		this.paths = paths;
 	}
 	
+	public StringsLoader withFormatter (Formatter formatter) {
+		Validate.notNull(formatter, "Formatter must not be null");
+		return new StringsLoader(formatter, fallback, defaultLocale, autoDiscover, paths);
+	}
+	
 	public StringsLoader withFallback (Fallback fallback) {
 		Validate.notNull(fallback, "Fallback must not be null");
-		return new StringsLoader(fallback, defaultLocale, autoDiscover, paths);
+		return new StringsLoader(formatter, fallback, defaultLocale, autoDiscover, paths);
 	}
 	
 	public StringsLoader withLocale (Locale locale) {
 		Validate.notNull(locale, "Locale must not be null");
-		return new StringsLoader(fallback, locale, autoDiscover, paths);
+		return new StringsLoader(formatter, fallback, locale, autoDiscover, paths);
 	}
 	
 	public StringsLoader withPaths(String... paths) {
-		return new StringsLoader(fallback, defaultLocale, false, ImmutableList.copyOf(paths));
+		return new StringsLoader(formatter, fallback, defaultLocale, false, ImmutableList.copyOf(paths));
 	}
 
 	public Strings load() throws IOException {
@@ -111,7 +119,7 @@ public class StringsLoader {
 		indexedCollection.index(collection);
 
 		// Returns some strings
-		return new DefaultStrings(indexedCollection, fallback);
+		return new DefaultStrings(indexedCollection, fallback, formatter);
 	}
 
 	protected Set<URL> discover() throws IOException, MalformedURLException {

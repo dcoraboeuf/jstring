@@ -7,6 +7,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import net.sf.jstring.Fallback;
+import net.sf.jstring.Formatter;
 import net.sf.jstring.Localizable;
 import net.sf.jstring.Strings;
 import net.sf.jstring.index.IndexedBundleCollection;
@@ -37,20 +38,26 @@ public class DefaultStrings implements Strings {
      * Fallback
      */
     private final Fallback fallback;
+    
+    /**
+     * Formatter
+     */
+    private final Formatter formatter;
 
     /**
      * No bundle associated with this instance
      */
     public DefaultStrings(IndexedBundleCollection indexedBundleCollection) {
-    	this(indexedBundleCollection, new SubstituteFallback());
+    	this(indexedBundleCollection, new SubstituteFallback(), new DefaultFormatter());
     }
 
     /**
      * No bundle associated with this instance
      */
-    public DefaultStrings(IndexedBundleCollection indexedBundleCollection, Fallback fallback) {
+    public DefaultStrings(IndexedBundleCollection indexedBundleCollection, Fallback fallback, Formatter formatter) {
     	this.indexedBundleCollection = indexedBundleCollection;
     	this.fallback = fallback;
+    	this.formatter = formatter;
     }
     
     @Override
@@ -110,7 +117,7 @@ public class DefaultStrings implements Strings {
 			});
         }
         // Formats the message
-        return format (pattern, params);
+        return format (localeToUse, pattern, params);
     }
     
     protected String resolve(Locale locale, String pattern) {
@@ -125,9 +132,8 @@ public class DefaultStrings implements Strings {
     	return buffer.toString();
 	}
 
-	protected String format (String pattern, Map<String, ?> parameters) {
-    	// FIXME Uses a formatter defined by the instance
-    	return pattern;
+	protected String format (Locale locale, String pattern, Map<String, ?> parameters) {
+		return formatter.format (locale, pattern, parameters);
     }
 
     /**
