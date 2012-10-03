@@ -12,7 +12,7 @@ import net.sf.jstring.Formatter;
 
 public class DefaultFormatter implements Formatter {
 	
-	private final Pattern replacementPattern = Pattern.compile("\\{([.^\\}]+)\\}");
+	private final Pattern replacementPattern = Pattern.compile("\\{([^\\}]+)\\}");
 
 	@Override
 	public String format(Locale locale, String pattern, Map<String, ?> parameters) {
