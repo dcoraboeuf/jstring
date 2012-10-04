@@ -86,6 +86,15 @@ public class StringsTest {
         String value = strings.get(null, "sample.two", "One", "Two");
         assertEquals("Two parameters: One, Two", value);
     }
+    
+    /**
+     * Escaping
+     */
+    @Test
+    public void testEscaping() {
+    	assertEquals("Start: ", strings.get(Locale.ENGLISH, "sample.prefix"));
+    	assertEquals("\n", strings.get(Locale.ENGLISH, "sample.suffix"));
+    }
 
     /**
      * Loads the strings.

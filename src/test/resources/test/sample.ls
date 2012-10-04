@@ -1,5 +1,10 @@
 # Sample localized strings for unit tests
 
+list.separator.prefix
+	en -> -\u0020
+list.separator.suffix
+	en -> \n
+
 [general]
 # General section
 

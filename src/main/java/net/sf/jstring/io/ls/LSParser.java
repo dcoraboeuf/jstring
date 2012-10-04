@@ -172,6 +172,9 @@ public class LSParser implements Parser {
 							}
 							// Direct value
 							else {
+								// Resolve the escaping
+								value = StringEscapeUtils.unescapeJava(value);
+								// Adds the value
 								keyBuilder.value(language, BundleValue.value(value));
 							}
 						} else {

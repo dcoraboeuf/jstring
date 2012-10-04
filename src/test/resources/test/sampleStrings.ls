@@ -22,8 +22,8 @@ sample.composite
 	fr -> Ceci est la version @[sample.version]
 
 sample.prefix
-	en -> Start: 
-	fr -> Début :
+	en -> Start:\u0020
+	fr -> Début :\u0020
 sample.suffix
 	en -> \n
 	fr -> \n
