@@ -63,10 +63,12 @@ public class DefaultStrings implements Strings {
     @Override
     public String get(Locale locale, Object key, Object... params) {
     	Map<String, Object> map = new LinkedHashMap<String, Object>();
-    	for (int i = 0; i < params.length; i++) {
-			Object param = params[i];
-			map.put(String.valueOf(i), param);
-		}
+    	if (params != null) {
+	    	for (int i = 0; i < params.length; i++) {
+				Object param = params[i];
+				map.put(String.valueOf(i), param);
+			}
+    	}
     	return get (locale, key, map);
     }
 
