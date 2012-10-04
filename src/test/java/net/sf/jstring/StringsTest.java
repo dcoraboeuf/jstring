@@ -105,7 +105,7 @@ public class StringsTest {
         Map<String, String> map = strings.getKeyValues(Locale.FRENCH);
         assertNotNull(map);
         assertEquals("Un param\u00E8tre : {0}", map.get("sample.one"));
-        assertEquals("Ceci est la version ${my.version}", map.get("sample.composite"));
+        assertEquals("Ceci est la version @[sample.version]", map.get("sample.composite"));
     }
     
     /**

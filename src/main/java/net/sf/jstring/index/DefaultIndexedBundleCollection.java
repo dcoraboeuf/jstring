@@ -1,5 +1,6 @@
 package net.sf.jstring.index;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -67,7 +68,7 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 			// Result
 			Map<String, String> result = new HashMap<String, String>();
 			// List of locales
-			List<Locale> locales = LocaleUtils.localeLookupList(locale, defaultLocale);
+			List<Locale> locales = new ArrayList<Locale>(LocaleUtils.localeLookupList(locale, defaultLocale));
 			// Loops in reverse order
 			Collections.reverse(locales);
 			for (Locale currentLocale : locales) {

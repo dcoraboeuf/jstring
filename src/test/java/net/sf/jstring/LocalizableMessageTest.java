@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import java.util.Locale;
 
-import net.sf.jstring.support.DefaultStrings;
+import net.sf.jstring.support.StringsLoader;
 
 import org.junit.BeforeClass;
 import org.junit.Test;
@@ -18,8 +18,7 @@ public class LocalizableMessageTest {
 	 */
 	@BeforeClass
 	public static void beforeClass() {
-        Locale.setDefault(Locale.ENGLISH);
-        strings = new DefaultStrings("test.SampleStrings");
+		strings = new StringsLoader().withLocale(Locale.ENGLISH).withPaths("test/sampleStrings.ls").load();
 	}
 
     @Test(expected = NullPointerException.class)

@@ -1,15 +1,15 @@
 package net.sf.jstring;
 
-import net.sf.jstring.support.DefaultStrings;
-
-import org.junit.Before;
-import org.junit.Test;
+import static org.junit.Assert.assertEquals;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Locale;
 
-import static org.junit.Assert.assertEquals;
+import net.sf.jstring.support.StringsLoader;
+
+import org.junit.Before;
+import org.junit.Test;
 
 /**
  * Unit test for the {@link }MultiLocalizable} class.
@@ -20,8 +20,7 @@ public class MultiLocalizableTest {
 
     @Before
     public void before() {
-        Locale.setDefault(Locale.ENGLISH);
-        strings = new DefaultStrings("test.SampleStrings");
+		strings = new StringsLoader().withLocale(Locale.ENGLISH).withPaths("test/sampleStrings.ls").load();
     }
 
     @Test

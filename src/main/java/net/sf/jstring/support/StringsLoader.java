@@ -32,6 +32,14 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 
 public class StringsLoader {
+	
+	public static Strings auto () {
+		return new StringsLoader().load();
+	}
+	
+	public static Strings empty () {
+		return new StringsLoader().withPaths().load();
+	}
 
 	private final Logger logger = LoggerFactory.getLogger(StringsLoader.class);
 
@@ -72,7 +80,7 @@ public class StringsLoader {
 		return new StringsLoader(formatter, fallback, defaultLocale, false, ImmutableList.copyOf(paths));
 	}
 
-	public Strings load() throws IOException {
+	public Strings load() {
 		
 		// Default locale?
 		logger.info("[strings] Setting default locale to {}", defaultLocale);
@@ -81,7 +89,11 @@ public class StringsLoader {
 		// Adds all properties in META-INF/strings/catalogue
 		Collection<URL> paths;
 		if (autoDiscover) {
-			paths = discover();
+			try {
+				paths = discover();
+			} catch (IOException ex) {
+				throw new CannotDiscoverStringsException (ex);
+			}
 		} else {
 			paths = Lists.transform(this.paths, new Function<String, URL>() {
 				@Override
