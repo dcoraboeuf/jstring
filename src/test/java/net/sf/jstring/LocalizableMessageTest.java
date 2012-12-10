@@ -20,7 +20,7 @@ public class LocalizableMessageTest {
         strings = new Strings("test.SampleStrings");
 	}
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void code_null() {
         new LocalizableMessage(null);
     }
