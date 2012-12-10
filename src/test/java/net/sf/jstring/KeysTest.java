@@ -18,7 +18,7 @@ public class KeysTest {
 
     @Before
     public void before() throws IOException {
-    	strings = new StringsLoader().withLocale(Locale.ENGLISH).withPaths("test/keys.ls").load();
+    	strings = new StringsLoader().withLocale(Locale.ENGLISH).withPaths("test/ls/keys.ls").load();
     }
 
     @Test

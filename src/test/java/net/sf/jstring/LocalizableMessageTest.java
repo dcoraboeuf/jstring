@@ -18,7 +18,7 @@ public class LocalizableMessageTest {
 	 */
 	@BeforeClass
 	public static void beforeClass() {
-		strings = new StringsLoader().withLocale(Locale.ENGLISH).withPaths("test/sampleStrings.ls").load();
+		strings = new StringsLoader().withLocale(Locale.ENGLISH).withPaths("test/ls/sampleStrings.ls").load();
 	}
 
     @Test(expected = NullPointerException.class)
