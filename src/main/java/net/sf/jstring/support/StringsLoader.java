@@ -33,6 +33,8 @@ import com.google.common.collect.Lists;
 
 public class StringsLoader {
 	
+	private static final String CATALOGUE_PATH = "META-INF/strings/catalogue";
+
 	public static Strings auto () {
 		return new StringsLoader().load();
 	}
@@ -135,9 +137,9 @@ public class StringsLoader {
 	}
 
 	protected Set<URL> discover() throws IOException, MalformedURLException {
-		logger.info("[strings] Scanning for all 'META-INF/strings/catalogue'...");
+		logger.info("[strings] Scanning for all '{}'...", CATALOGUE_PATH);
 		Set<URL> paths = new HashSet<URL>();
-		Enumeration<URL> resources = getClass().getClassLoader().getResources("META-INF/strings/catalogue");
+		Enumeration<URL> resources = getClass().getClassLoader().getResources(CATALOGUE_PATH);
 		while (resources.hasMoreElements()) {
 			URL url = resources.nextElement();
 			logger.info("[strings] Trying to load URL {}", url);
