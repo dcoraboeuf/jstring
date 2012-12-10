@@ -12,6 +12,7 @@ import net.sf.jstring.Localizable;
 import net.sf.jstring.Strings;
 import net.sf.jstring.index.IndexedBundleCollection;
 
+import net.sf.jstring.model.BundleCollection;
 import org.apache.commons.lang3.Validate;
 
 import com.google.common.base.Function;
@@ -58,6 +59,11 @@ public class DefaultStrings implements Strings {
     	this.indexedBundleCollection = indexedBundleCollection;
     	this.fallback = fallback;
     	this.formatter = formatter;
+    }
+
+    @Override
+    public BundleCollection getBundleCollection() {
+        return indexedBundleCollection.getBundleCollection();
     }
     
     @Override

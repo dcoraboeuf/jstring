@@ -26,6 +26,7 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 	private final Map<String, Map<String, String>> index = new HashMap<String, Map<String, String>>();
 
 	private final Locale defaultLocale;
+    private BundleCollection bundleCollection;
 
 	public DefaultIndexedBundleCollection(Locale defaultLocale) {
 		Validate.notNull(defaultLocale, "Default locale is required");
@@ -55,10 +56,20 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 					}
 				}
 			}
+            this.bundleCollection = bundleCollection;
 		} finally {
 			lock.unlock();
 		}
 	}
+
+    @Override
+    public BundleCollection getBundleCollection () {
+        if (bundleCollection != null) {
+            return bundleCollection;
+        } else {
+            throw new IllegalStateException("No collection was indexed yet.");
+        }
+    }
 	
 	@Override
 	public Map<String, String> getValues(Locale locale) {

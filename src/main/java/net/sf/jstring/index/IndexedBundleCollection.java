@@ -8,6 +8,8 @@ import net.sf.jstring.model.BundleCollection;
 public interface IndexedBundleCollection {
 	
 	void index (BundleCollection bundleCollection);
+
+    BundleCollection getBundleCollection ();
 	
 	String getValue (Locale locale, String key);
 

@@ -1,5 +1,7 @@
 package net.sf.jstring;
 
+import net.sf.jstring.model.BundleCollection;
+
 import java.util.Locale;
 import java.util.Map;
 
@@ -49,5 +51,10 @@ public interface Strings {
      * @return Map of key/values for this locale
      */
     Map<String, String> getKeyValues(Locale locale);
+
+    /**
+     * Gets the underlying bundle collection
+     */
+    BundleCollection getBundleCollection();
 
 }
