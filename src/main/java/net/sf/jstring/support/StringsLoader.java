@@ -17,6 +17,9 @@ import net.sf.jstring.Strings;
 import net.sf.jstring.builder.BundleCollectionBuilder;
 import net.sf.jstring.index.DefaultIndexedBundleCollection;
 import net.sf.jstring.index.IndexedBundleCollection;
+import net.sf.jstring.io.DefaultParserFactory;
+import net.sf.jstring.io.Parser;
+import net.sf.jstring.io.ParserFactory;
 import net.sf.jstring.io.ls.LSParser;
 import net.sf.jstring.model.Bundle;
 import net.sf.jstring.model.BundleCollection;
@@ -50,36 +53,43 @@ public class StringsLoader {
 	private final ImmutableList<String> paths;
 	private final Fallback fallback;
 	private final Formatter formatter;
+    private final ParserFactory parserFactory;
 	
 	public StringsLoader() {
-		this(new DefaultFormatter(), new SubstituteFallback(), Locale.ENGLISH, true, ImmutableList.<String>of());
+		this(new DefaultParserFactory(), new DefaultFormatter(), new SubstituteFallback(), Locale.ENGLISH, true, ImmutableList.<String>of());
 	}
 	
-	public StringsLoader(Formatter formatter, Fallback fallback, Locale defaultLocale, boolean autoDiscover, ImmutableList<String> paths) {
+	public StringsLoader(ParserFactory parserFactory, Formatter formatter, Fallback fallback, Locale defaultLocale, boolean autoDiscover, ImmutableList<String> paths) {
+        this.parserFactory = parserFactory;
 		this.fallback = fallback;
 		this.formatter = formatter;
 		this.defaultLocale = defaultLocale;
 		this.autoDiscover = autoDiscover;
 		this.paths = paths;
 	}
-	
-	public StringsLoader withFormatter (Formatter formatter) {
-		Validate.notNull(formatter, "Formatter must not be null");
-		return new StringsLoader(formatter, fallback, defaultLocale, autoDiscover, paths);
-	}
+
+    public StringsLoader withParserFactory (ParserFactory parserFactory) {
+        Validate.notNull(parserFactory, "Parser factory must not be null");
+        return new StringsLoader(parserFactory, formatter, fallback, defaultLocale, autoDiscover, paths);
+    }
+
+    public StringsLoader withFormatter (Formatter formatter) {
+        Validate.notNull(formatter, "Formatter must not be null");
+        return new StringsLoader(parserFactory, formatter, fallback, defaultLocale, autoDiscover, paths);
+    }
 	
 	public StringsLoader withFallback (Fallback fallback) {
 		Validate.notNull(fallback, "Fallback must not be null");
-		return new StringsLoader(formatter, fallback, defaultLocale, autoDiscover, paths);
+		return new StringsLoader(parserFactory, formatter, fallback, defaultLocale, autoDiscover, paths);
 	}
 	
 	public StringsLoader withLocale (Locale locale) {
 		Validate.notNull(locale, "Locale must not be null");
-		return new StringsLoader(formatter, fallback, locale, autoDiscover, paths);
+		return new StringsLoader(parserFactory, formatter, fallback, locale, autoDiscover, paths);
 	}
 	
 	public StringsLoader withPaths(String... paths) {
-		return new StringsLoader(formatter, fallback, defaultLocale, false, ImmutableList.copyOf(paths));
+		return new StringsLoader(parserFactory, formatter, fallback, defaultLocale, false, ImmutableList.copyOf(paths));
 	}
 
 	public Strings load() {
@@ -112,15 +122,15 @@ public class StringsLoader {
 		
 		// Bundle collection
 		BundleCollectionBuilder collectionBuilder = BundleCollectionBuilder.create();
-		
-		// Gets the parser
-		// TODO Configurable parser
+
 		// TODO Configurable trace mode
-		LSParser parser = new LSParser();
 		
 		// Parses all URL
 		for (URL path: paths) {
 			logger.info("[strings] Parsing path {}", path);
+            // Gets the parser
+            Parser parser = parserFactory.getParser(path);
+            // Parsing
 			Bundle bundle = parser.parse(path);
 			collectionBuilder.bundle(bundle);
 		}
