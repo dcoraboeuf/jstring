@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://jstring.sf.net/xml" xmlns:ns="http://jstring.sf.net/xml" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="localization" type="ns:localizationType" xmlns:ns="http://jstring.sf.net/xml"/>
+  <xs:complexType name="sectionType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="comment" maxOccurs="unbounded" minOccurs="0"/>
+      <xs:element type="ns:keyType" name="key" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="name" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="valueType" mixed="true">
+    <xs:sequence>
+      <xs:element type="xs:string" name="comment" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="lang" use="required"/>
+  </xs:complexType>
+  <xs:complexType name="localizationType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="comment" maxOccurs="unbounded" minOccurs="0"/>
+      <xs:element type="ns:keyType" name="key" maxOccurs="unbounded" minOccurs="0"/>
+      <xs:element type="ns:sectionType" name="section" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="keyType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="comment" maxOccurs="unbounded" minOccurs="0"/>
+      <xs:element type="ns:valueType" name="value" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute type="xs:string" name="name" use="required"/>
+  </xs:complexType>
+</xs:schema>
