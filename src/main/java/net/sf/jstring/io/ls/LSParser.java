@@ -23,7 +23,7 @@ import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.*;
 
-public class LSParser extends AbstractParser {
+public class LSParser extends AbstractParser<LSParser> {
 
 	private static final String ENCODING = "UTF-8";
 
@@ -315,8 +315,13 @@ public class LSParser extends AbstractParser {
 		super();
 	}
 
-	public LSParser(boolean trace) {
+	protected LSParser(boolean trace) {
 		super(trace);
+	}
+	
+	@Override
+	public LSParser withTraces() {
+		return new LSParser(true);
 	}
 
 	@Override

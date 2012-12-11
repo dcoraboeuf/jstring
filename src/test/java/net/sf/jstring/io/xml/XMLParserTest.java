@@ -11,8 +11,8 @@ public class XMLParserTest extends AbstractParserTest {
     }
 
     @Override
-    protected Parser createParser() {
-        return new XMLParser(true);
+    protected Parser<?> createParser() {
+        return new XMLParser().withTraces();
     }
 
 }

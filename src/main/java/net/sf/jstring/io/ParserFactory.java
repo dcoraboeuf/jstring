@@ -4,6 +4,6 @@ import java.net.URL;
 
 public interface ParserFactory {
 
-    Parser getParser(URL path);
+    Parser<?> getParser(URL path);
 
 }

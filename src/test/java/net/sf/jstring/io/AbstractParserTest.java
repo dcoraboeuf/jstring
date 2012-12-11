@@ -16,7 +16,7 @@ public abstract class AbstractParserTest {
 
     protected abstract String getTestFileResourcePath();
 
-    protected abstract Parser createParser();
+    protected abstract Parser<?> createParser();
 
 	@Test
 	public void parse_ok() {

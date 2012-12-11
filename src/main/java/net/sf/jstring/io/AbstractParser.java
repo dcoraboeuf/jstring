@@ -6,7 +6,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URL;
 
-public abstract class AbstractParser implements Parser {
+public abstract class AbstractParser<P extends AbstractParser<P>> implements Parser<P> {
 
     protected final Logger logger = LoggerFactory.getLogger(Parser.class);
 
@@ -16,7 +16,7 @@ public abstract class AbstractParser implements Parser {
         this(false);
     }
 
-    public AbstractParser(boolean trace) {
+    protected AbstractParser(boolean trace) {
         this.trace = trace;
     }
 

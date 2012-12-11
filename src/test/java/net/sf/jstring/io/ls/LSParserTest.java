@@ -11,8 +11,8 @@ public class LSParserTest extends AbstractParserTest {
     }
 
     @Override
-    protected Parser createParser() {
-        return new LSParser(true);
+    protected Parser<?> createParser() {
+        return new LSParser().withTraces();
     }
 
 }

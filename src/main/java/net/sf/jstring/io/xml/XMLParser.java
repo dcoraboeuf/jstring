@@ -1,5 +1,20 @@
 package net.sf.jstring.io.xml;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
+
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+
 import net.sf.jstring.builder.BundleBuilder;
 import net.sf.jstring.builder.BundleKeyBuilder;
 import net.sf.jstring.builder.BundleSectionBuilder;
@@ -10,6 +25,7 @@ import net.sf.jstring.io.CannotParseException;
 import net.sf.jstring.model.Bundle;
 import net.sf.jstring.model.BundleKey;
 import net.sf.jstring.model.BundleSection;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -18,21 +34,7 @@ import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-public class XMLParser extends AbstractParser {
+public class XMLParser extends AbstractParser<XMLParser> {
 
     public interface ElementIterator {
 
@@ -44,8 +46,13 @@ public class XMLParser extends AbstractParser {
         super();
     }
 
-    public XMLParser(boolean trace) {
+    protected XMLParser(boolean trace) {
         super(trace);
+    }
+    
+    @Override
+    public XMLParser withTraces() {
+    	return new XMLParser(true);
     }
 
     @Override
