@@ -1,0 +1,43 @@
+<localization xmlns="http://jstring.sf.net/xml">
+    <comment>Sample localized strings for unit tests</comment>
+    <key name="list.separator.prefix">
+        <value lang="en">-\u0020</value>
+    </key>
+    <key name="list.separator.suffix">
+        <value lang="en">\n</value>
+    </key>
+    <section name="general">
+        <comment>General section</comment>
+        <key name="app.title">
+            <comment>Application title</comment>
+            <value lang="en">My favourite application</value>
+            <value lang="fr">Mon application préférée</value>
+        </key>
+    </section>
+    <section name="home">
+        <comment>Home page</comment>
+        <key name="home.title">
+            <comment>Home page title</comment>
+            <value lang="en">Home page</value>
+            <value lang="fr">Page d'acceuil</value>
+        </key>
+        <key name="home.message">
+            <comment>Message to display on the home page. This is a very long message</comment>
+            <value lang="en">This is a very long message that spans on
+                several lines.
+                <comment>Comments are supported in the middle of the text</comment>
+                Carriage returns are introduced using the normal \n Java
+                escaping. Other ones are ignored.
+                There is no need to escape the # character</value>
+            <value lang="fr">Ceci est un très long message qui s'étend
+                sur plusieurs lignes.
+                Les retours chariot sont notifiés grâce au \n Java. Les
+                autres sont ignorés.</value>
+        </key>
+        <key name="home.info">
+            <comment>Placeholders are supported by name</comment>
+            <value lang="en">Application version: {version}, build: {build}, {{not a parameter}}</value>
+            <value lang="fr">Version de l'application: {version}, build: {build}, {{pas un paramètre}}</value>
+        </key>
+    </section>
+</localization>
