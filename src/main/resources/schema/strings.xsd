@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" targetNamespace="http://jstring.sf.net/xml" xmlns:ns="http://jstring.sf.net/xml" xmlns:xs="http://www.w3.org/2001/XMLSchema">
-  <xs:element name="localization" type="ns:localizationType" xmlns:ns="http://jstring.sf.net/xml"/>
+  <xs:element name="localization" type="ns:localizationType"/>
   <xs:complexType name="sectionType">
     <xs:sequence>
       <xs:element type="xs:string" name="comment" maxOccurs="unbounded" minOccurs="0"/>

@@ -19,20 +19,22 @@
         <key name="home.title">
             <comment>Home page title</comment>
             <value lang="en">Home page</value>
-            <value lang="fr">Page d'acceuil</value>
+            <value lang="fr">Page d'accueil</value>
         </key>
         <key name="home.message">
-            <comment>Message to display on the home page. This is a very long message</comment>
+            <comment>Message to display on the home page</comment>
+            <comment>This is a very long message</comment>
             <value lang="en">This is a very long message that spans on
                 several lines.
                 <comment>Comments are supported in the middle of the text</comment>
                 Carriage returns are introduced using the normal \n Java
                 escaping. Other ones are ignored.
-                There is no need to escape the # character</value>
+                # The # character must be escaped at the beginning.</value>
             <value lang="fr">Ceci est un très long message qui s'étend
                 sur plusieurs lignes.
                 Les retours chariot sont notifiés grâce au \n Java. Les
-                autres sont ignorés.</value>
+                autres sont ignorés.
+                # Le caractère # doit être doublé au début d'une ligne.</value>
         </key>
         <key name="home.info">
             <comment>Placeholders are supported by name</comment>

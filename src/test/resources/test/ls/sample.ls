@@ -43,4 +43,5 @@ home.message
 home.info
 	# Placeholders are supported by name
 	en -> Application version: {version}, build: {build}, {{not a parameter}}
+	fr -> Version de l'application: {version}, build: {build}, {{pas un paramètre}}
 	

@@ -1,9 +1,16 @@
 package net.sf.jstring.io.ls;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.startsWith;
-import static org.apache.commons.lang3.StringUtils.substring;
-import static org.apache.commons.lang3.StringUtils.trim;
+import net.sf.jstring.builder.BundleBuilder;
+import net.sf.jstring.builder.BundleKeyBuilder;
+import net.sf.jstring.builder.BundleSectionBuilder;
+import net.sf.jstring.builder.BundleValueBuilder;
+import net.sf.jstring.io.AbstractParser;
+import net.sf.jstring.io.CannotOpenException;
+import net.sf.jstring.io.CannotParseException;
+import net.sf.jstring.model.Bundle;
+import net.sf.jstring.model.BundleValue;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -14,20 +21,9 @@ import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import net.sf.jstring.builder.BundleBuilder;
-import net.sf.jstring.builder.BundleKeyBuilder;
-import net.sf.jstring.builder.BundleSectionBuilder;
-import net.sf.jstring.builder.BundleValueBuilder;
-import net.sf.jstring.io.Parser;
-import net.sf.jstring.model.Bundle;
-import net.sf.jstring.model.BundleValue;
+import static org.apache.commons.lang3.StringUtils.*;
 
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-public class LSParser implements Parser {
+public class LSParser extends AbstractParser {
 
 	private static final String ENCODING = "UTF-8";
 
@@ -315,16 +311,12 @@ public class LSParser implements Parser {
 		return startsWith(line, COMMENT_PREFIX);
 	}
 
-	private final Logger logger = LoggerFactory.getLogger(LSParser.class);
-
-	private final boolean trace;
-
 	public LSParser() {
-		this(false);
+		super();
 	}
 
 	public LSParser(boolean trace) {
-		this.trace = trace;
+		super(trace);
 	}
 
 	@Override
@@ -332,7 +324,7 @@ public class LSParser implements Parser {
 		try {
 			InputStream in = url.openStream();
 			if (in == null) {
-				throw new CannotOpenLSException (url);
+				throw new CannotOpenException(url);
 			} else {
 				try {
 					return parse(getBundleName(url), in);
@@ -341,16 +333,8 @@ public class LSParser implements Parser {
 				}
 			}
 		} catch (IOException ex) {
-			throw new CannotParseLSException(url, ex);
+			throw new CannotParseException(url, ex);
 		}
-	}
-
-	protected String getBundleName(URL url) {
-		String path = url.getFile();
-		path = StringUtils.replace(path, "\\", "/");
-		path = StringUtils.substringAfterLast(path, "/");
-		path = StringUtils.substringBeforeLast(path, ".");
-		return path;
 	}
 
 	protected Bundle parse(String name, InputStream in) throws IOException {
@@ -369,9 +353,7 @@ public class LSParser implements Parser {
 	}
 
 	protected void consume(ParsingContext ctx, String line, int lineNo) {
-		if (trace) {
-			logger.debug("[{}] {} --> {}", new Object[] { lineNo, ctx.getConsumerName(), line });
-		}
+        trace("[{}] {} --> {}", lineNo, ctx.getConsumerName(), line);
 		ctx.consume(StringUtils.trim(line), lineNo);
 	}
 
