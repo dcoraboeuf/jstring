@@ -20,7 +20,6 @@ import net.sf.jstring.index.IndexedBundleCollection;
 import net.sf.jstring.io.DefaultParserFactory;
 import net.sf.jstring.io.Parser;
 import net.sf.jstring.io.ParserFactory;
-import net.sf.jstring.io.ls.LSParser;
 import net.sf.jstring.model.Bundle;
 import net.sf.jstring.model.BundleCollection;
 
