@@ -1,16 +1,8 @@
 package net.sf.jstring.support;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.Collection;
-import java.util.Enumeration;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
-
+import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
 import net.sf.jstring.Fallback;
 import net.sf.jstring.Formatter;
 import net.sf.jstring.Strings;
@@ -23,16 +15,17 @@ import net.sf.jstring.io.Parser;
 import net.sf.jstring.io.ParserFactory;
 import net.sf.jstring.model.Bundle;
 import net.sf.jstring.model.BundleCollection;
-
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import com.google.common.base.Function;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
 
 public class StringsLoader {
 	
@@ -154,7 +147,7 @@ public class StringsLoader {
 		BundleCollection collection = collectionBuilder.build();
 		
 		// Indexation of the collection
-		IndexedBundleCollection indexedCollection = new DefaultIndexedBundleCollection(defaultLocale);
+		IndexedBundleCollection indexedCollection = new DefaultIndexedBundleCollection(supportedLocales);
 		indexedCollection.index(collection);
 
 		// Returns some strings

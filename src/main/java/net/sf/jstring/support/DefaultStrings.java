@@ -1,22 +1,20 @@
 package net.sf.jstring.support;
 
-import java.util.LinkedHashMap;
-import java.util.Locale;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
+import com.google.common.base.Function;
+import com.google.common.collect.Maps;
 import net.sf.jstring.Fallback;
 import net.sf.jstring.Formatter;
 import net.sf.jstring.Localizable;
 import net.sf.jstring.Strings;
 import net.sf.jstring.index.IndexedBundleCollection;
-
 import net.sf.jstring.model.BundleCollection;
 import org.apache.commons.lang3.Validate;
 
-import com.google.common.base.Function;
-import com.google.common.collect.Maps;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * String server.
@@ -85,7 +83,7 @@ public class DefaultStrings implements Strings {
      * @param code   Code as a non-null object. toString will be used.
      * @param params Parameters for the string
      * @return Corresponding string
-     * @see #get(java.util.Locale, String, boolean)
+     * @see IndexedBundleCollection#getValue(java.util.Locale, String)
      */
     @Override
     public String get(Locale locale, Object code, Map<String, ?> params) {
@@ -94,7 +92,7 @@ public class DefaultStrings implements Strings {
         // Default locale is null
         final Locale localeToUse;
         if (locale == null) {
-            localeToUse = Locale.getDefault();
+            localeToUse = indexedBundleCollection.getSupportedLocales().getDefaultLocale();
         } else {
         	localeToUse = locale;
         }
@@ -158,7 +156,7 @@ public class DefaultStrings implements Strings {
         Validate.notNull(code, "The code cannot be null.");
         // Default locale is null
         if (locale == null) {
-            locale = Locale.getDefault();
+            locale = indexedBundleCollection.getSupportedLocales().getDefaultLocale();
         }
         // Gets the code as a string
         String key = code.toString();
@@ -178,7 +176,7 @@ public class DefaultStrings implements Strings {
     public synchronized Map<String, String> getKeyValues(Locale locale) {
         // Default locale is null
         if (locale == null) {
-            locale = Locale.getDefault();
+            locale = indexedBundleCollection.getSupportedLocales().getDefaultLocale();
         }
         // Gets all values
         Map<String, String> map = indexedBundleCollection.getValues (locale);

@@ -1,5 +1,6 @@
 package net.sf.jstring.index;
 
+import net.sf.jstring.SupportedLocales;
 import net.sf.jstring.model.*;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.Validate;
@@ -15,16 +16,20 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 
 	private final Map<Locale, Map<String, String>> index = new HashMap<Locale, Map<String, String>>();
 
-    // FIXME Uses supported locales interface
-	private final Locale defaultLocale;
+	private final SupportedLocales supportedLocales;
     private BundleCollection bundleCollection;
 
-	public DefaultIndexedBundleCollection(Locale defaultLocale) {
-		Validate.notNull(defaultLocale, "Default locale is required");
-		this.defaultLocale = defaultLocale;
+	public DefaultIndexedBundleCollection(SupportedLocales supportedLocales) {
+		Validate.notNull(supportedLocales, "Supported locales are required");
+		this.supportedLocales = supportedLocales;
 	}
 
-	@Override
+    @Override
+    public SupportedLocales getSupportedLocales() {
+        return supportedLocales;
+    }
+
+    @Override
 	public void index(BundleCollection bundleCollection) {
 		Lock lock = indexLock.writeLock();
 		lock.lock();
@@ -70,7 +75,7 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 			// Result
 			Map<String, String> result = new HashMap<String, String>();
 			// List of locales
-			List<Locale> locales = new ArrayList<Locale>(LocaleUtils.localeLookupList(locale, defaultLocale));
+			List<Locale> locales = new ArrayList<Locale>(LocaleUtils.localeLookupList(locale, supportedLocales.getDefaultLocale()));
 			// Loops in reverse order
 			Collections.reverse(locales);
 			for (Locale currentLocale : locales) {
@@ -94,7 +99,7 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 		lock.lock();
 		try {
 			// List of locales
-			List<Locale> locales = LocaleUtils.localeLookupList(locale, defaultLocale);
+			List<Locale> locales = LocaleUtils.localeLookupList(locale, supportedLocales.getDefaultLocale());
 			for (Locale currentLocale : locales) {
 				// Gets the language map
 				Map<String, String> map = index.get(currentLocale);
