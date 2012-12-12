@@ -23,6 +23,11 @@ public class StringsTest {
 
     private Strings strings;
 
+    @Before
+    public void setUp() throws IOException {
+        strings = new StringsLoader().withLocale(Locale.FRENCH).withPaths("test/ls/sampleStrings.ls").load();
+    }
+
     /**
      * Composite pattern where one argument is containing ${...}
      */
@@ -94,16 +99,6 @@ public class StringsTest {
     public void testEscaping() {
     	assertEquals("Start: ", strings.get(Locale.ENGLISH, "sample.prefix"));
     	assertEquals("\n", strings.get(Locale.ENGLISH, "sample.suffix"));
-    }
-
-    /**
-     * Loads the strings.
-     *
-     * @see junit.framework.TestCase#setUp()
-     */
-    @Before
-    public void setUp() throws IOException {
-        strings = new StringsLoader().withLocale(Locale.ENGLISH).withPaths("test/ls/sampleStrings.ls").load();
     }
 
     /**

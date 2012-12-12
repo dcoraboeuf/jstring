@@ -3,10 +3,8 @@ package net.sf.jstring.support;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import net.sf.jstring.Fallback;
+import net.sf.jstring.*;
 import net.sf.jstring.Formatter;
-import net.sf.jstring.Strings;
-import net.sf.jstring.SupportedLocales;
 import net.sf.jstring.builder.BundleCollectionBuilder;
 import net.sf.jstring.index.DefaultIndexedBundleCollection;
 import net.sf.jstring.index.IndexedBundleCollection;
@@ -30,6 +28,10 @@ import java.util.*;
 public class StringsLoader {
 	
 	private static final String CATALOGUE_PATH = "META-INF/strings/catalogue";
+
+    public static StringsLoader basic() {
+        return new StringsLoader();
+    }
 
 	public static Strings auto () {
 		return new StringsLoader().load();
@@ -86,6 +88,11 @@ public class StringsLoader {
     public StringsLoader withLocale (SupportedLocales locales) {
         Validate.notNull(locales, "Supported locales must not be null");
         return new StringsLoader(parserFactory, formatter, fallback, locales, autoDiscover, paths, traces);
+    }
+
+    public StringsLoader withPolicy (LocalePolicy policy) {
+        Validate.notNull(policy, "Policy must not be null");
+        return new StringsLoader(parserFactory, formatter, fallback, supportedLocales.withPolicy(policy), autoDiscover, paths, traces);
     }
 	
 	public StringsLoader withPaths(String... paths) {

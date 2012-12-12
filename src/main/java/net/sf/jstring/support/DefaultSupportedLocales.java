@@ -26,7 +26,7 @@ public class DefaultSupportedLocales implements SupportedLocales {
     }
 
     public DefaultSupportedLocales(List<Locale> locales) {
-        this(LocalePolicy.EXTENDS, locales);
+        this(LocalePolicy.ERROR, locales);
     }
 
     public DefaultSupportedLocales(LocalePolicy localePolicy, List<Locale> locales) {

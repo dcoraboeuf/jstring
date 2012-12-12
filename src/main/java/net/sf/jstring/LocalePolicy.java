@@ -13,7 +13,7 @@ public enum LocalePolicy {
     DEFAULT,
 
     /**
-     * If the locale is not defined, raises an error
+     * If the locale is not defined, raises an error. This is the default.
      */
     ERROR;
 

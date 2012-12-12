@@ -19,7 +19,7 @@ public class DefaultSupportedLocalesTest {
         DefaultSupportedLocales locales = new DefaultSupportedLocales();
         assertEquals(ENGLISH, locales.getDefaultLocale());
         assertEquals(asList(ENGLISH), locales.getSupportedLocales());
-        assertEquals(LocalePolicy.EXTENDS, locales.getLocalePolicy());
+        assertEquals(LocalePolicy.ERROR, locales.getLocalePolicy());
     }
 
     @Test
@@ -27,7 +27,7 @@ public class DefaultSupportedLocalesTest {
         DefaultSupportedLocales locales = new DefaultSupportedLocales(ENGLISH);
         assertEquals(ENGLISH, locales.getDefaultLocale());
         assertEquals(asList(ENGLISH), locales.getSupportedLocales());
-        assertEquals(LocalePolicy.EXTENDS, locales.getLocalePolicy());
+        assertEquals(LocalePolicy.ERROR, locales.getLocalePolicy());
     }
 
     @Test
@@ -35,7 +35,7 @@ public class DefaultSupportedLocalesTest {
         DefaultSupportedLocales locales = new DefaultSupportedLocales(ENGLISH, FRENCH);
         assertEquals(ENGLISH, locales.getDefaultLocale());
         assertEquals(asList(ENGLISH, FRENCH), locales.getSupportedLocales());
-        assertEquals(LocalePolicy.EXTENDS, locales.getLocalePolicy());
+        assertEquals(LocalePolicy.ERROR, locales.getLocalePolicy());
     }
 
     @Test(expected = NullPointerException.class)
@@ -53,11 +53,11 @@ public class DefaultSupportedLocalesTest {
         SupportedLocales locales = new DefaultSupportedLocales();
         assertEquals(ENGLISH, locales.getDefaultLocale());
         assertEquals(asList(ENGLISH), locales.getSupportedLocales());
-        assertEquals(LocalePolicy.EXTENDS, locales.getLocalePolicy());
+        assertEquals(LocalePolicy.ERROR, locales.getLocalePolicy());
         locales = locales.withLocale(FRENCH);
         assertEquals(ENGLISH, locales.getDefaultLocale());
         assertEquals(asList(ENGLISH, FRENCH), locales.getSupportedLocales());
-        assertEquals(LocalePolicy.EXTENDS, locales.getLocalePolicy());
+        assertEquals(LocalePolicy.ERROR, locales.getLocalePolicy());
     }
 
     @Test
@@ -65,11 +65,11 @@ public class DefaultSupportedLocalesTest {
         SupportedLocales locales = new DefaultSupportedLocales();
         assertEquals(ENGLISH, locales.getDefaultLocale());
         assertEquals(asList(ENGLISH), locales.getSupportedLocales());
-        assertEquals(LocalePolicy.EXTENDS, locales.getLocalePolicy());
-        locales = locales.withPolicy(LocalePolicy.ERROR);
+        assertEquals(LocalePolicy.ERROR, locales.getLocalePolicy());
+        locales = locales.withPolicy(LocalePolicy.EXTENDS);
         assertEquals(ENGLISH, locales.getDefaultLocale());
         assertEquals(asList(ENGLISH), locales.getSupportedLocales());
-        assertEquals(LocalePolicy.ERROR, locales.getLocalePolicy());
+        assertEquals(LocalePolicy.EXTENDS, locales.getLocalePolicy());
     }
 
     @Test

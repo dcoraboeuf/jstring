@@ -24,7 +24,7 @@ public class LocalizableExceptionTest {
 	 */
 	@BeforeClass
 	public static void beforeClass() {
-		strings = new StringsLoader().withLocale(Locale.ENGLISH).withPaths("test/ls/sampleStrings.ls").load();
+		strings = new StringsLoader().withLocale(Locale.FRENCH).withPaths("test/ls/sampleStrings.ls").load();
 	}
 
 	/**
