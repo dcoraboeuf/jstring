@@ -14,6 +14,7 @@ import java.util.Set;
 import net.sf.jstring.Fallback;
 import net.sf.jstring.Formatter;
 import net.sf.jstring.Strings;
+import net.sf.jstring.SupportedLocales;
 import net.sf.jstring.builder.BundleCollectionBuilder;
 import net.sf.jstring.index.DefaultIndexedBundleCollection;
 import net.sf.jstring.index.IndexedBundleCollection;
@@ -47,7 +48,7 @@ public class StringsLoader {
 
 	private final Logger logger = LoggerFactory.getLogger(StringsLoader.class);
 
-	private final Locale defaultLocale;
+	private final SupportedLocales supportedLocales;
 	private final boolean autoDiscover;
 	private final ImmutableList<String> paths;
 	private final Fallback fallback;
@@ -56,14 +57,14 @@ public class StringsLoader {
     private final boolean traces;
 	
 	public StringsLoader() {
-		this(new DefaultParserFactory(), new DefaultFormatter(), new SubstituteFallback(), Locale.ENGLISH, true, ImmutableList.<String>of(), false);
+		this(new DefaultParserFactory(), new DefaultFormatter(), new SubstituteFallback(), new DefaultSupportedLocales(), true, ImmutableList.<String>of(), false);
 	}
 	
-	public StringsLoader(ParserFactory parserFactory, Formatter formatter, Fallback fallback, Locale defaultLocale, boolean autoDiscover, ImmutableList<String> paths, boolean traces) {
+	public StringsLoader(ParserFactory parserFactory, Formatter formatter, Fallback fallback, SupportedLocales supportedLocales, boolean autoDiscover, ImmutableList<String> paths, boolean traces) {
         this.parserFactory = parserFactory;
 		this.fallback = fallback;
 		this.formatter = formatter;
-		this.defaultLocale = defaultLocale;
+		this.supportedLocales = supportedLocales;
 		this.autoDiscover = autoDiscover;
 		this.paths = paths;
 		this.traces = traces;
@@ -71,36 +72,43 @@ public class StringsLoader {
 
     public StringsLoader withParserFactory (ParserFactory parserFactory) {
         Validate.notNull(parserFactory, "Parser factory must not be null");
-        return new StringsLoader(parserFactory, formatter, fallback, defaultLocale, autoDiscover, paths, traces);
+        return new StringsLoader(parserFactory, formatter, fallback, supportedLocales, autoDiscover, paths, traces);
     }
 
     public StringsLoader withFormatter (Formatter formatter) {
         Validate.notNull(formatter, "Formatter must not be null");
-        return new StringsLoader(parserFactory, formatter, fallback, defaultLocale, autoDiscover, paths, traces);
+        return new StringsLoader(parserFactory, formatter, fallback, supportedLocales, autoDiscover, paths, traces);
     }
 	
 	public StringsLoader withFallback (Fallback fallback) {
 		Validate.notNull(fallback, "Fallback must not be null");
-		return new StringsLoader(parserFactory, formatter, fallback, defaultLocale, autoDiscover, paths, traces);
+		return new StringsLoader(parserFactory, formatter, fallback, supportedLocales, autoDiscover, paths, traces);
 	}
-	
-	public StringsLoader withLocale (Locale locale) {
-		Validate.notNull(locale, "Locale must not be null");
-		return new StringsLoader(parserFactory, formatter, fallback, locale, autoDiscover, paths, traces);
-	}
+
+    public StringsLoader withLocale (Locale locale) {
+        Validate.notNull(locale, "Locale must not be null");
+        return new StringsLoader(parserFactory, formatter, fallback, supportedLocales.withLocale(locale), autoDiscover, paths, traces);
+    }
+
+    public StringsLoader withLocale (SupportedLocales locales) {
+        Validate.notNull(locales, "Supported locales must not be null");
+        return new StringsLoader(parserFactory, formatter, fallback, locales, autoDiscover, paths, traces);
+    }
 	
 	public StringsLoader withPaths(String... paths) {
-		return new StringsLoader(parserFactory, formatter, fallback, defaultLocale, false, ImmutableList.copyOf(paths), traces);
+		return new StringsLoader(parserFactory, formatter, fallback, supportedLocales, false, ImmutableList.copyOf(paths), traces);
 	}
 	
 	public StringsLoader withTraces() {
-		return new StringsLoader(parserFactory, formatter, fallback, defaultLocale, false, ImmutableList.copyOf(paths), true);
+		return new StringsLoader(parserFactory, formatter, fallback, supportedLocales, false, ImmutableList.copyOf(paths), true);
 	}
 
 	public Strings load() {
 		
 		// Default locale?
-		logger.info("[strings] Setting default locale to {}", defaultLocale);
+        Locale defaultLocale = supportedLocales.getDefaultLocale();
+        logger.info("[strings] Setting default locale to {}", defaultLocale);
+        logger.info("[strings] Supported locales are {}", supportedLocales.getSupportedLocales());
 		Locale.setDefault(defaultLocale);
 		
 		// Adds all properties in META-INF/strings/catalogue
@@ -138,7 +146,7 @@ public class StringsLoader {
             	parser = parser.withTraces();
             }
             // Parsing
-			Bundle bundle = parser.parse(path);
+			Bundle bundle = parser.parse(supportedLocales, path);
 			collectionBuilder.bundle(bundle);
 		}
 		

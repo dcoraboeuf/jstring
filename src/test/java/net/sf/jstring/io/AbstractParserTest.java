@@ -6,9 +6,11 @@ import net.sf.jstring.builder.BundleSectionBuilder;
 import net.sf.jstring.builder.BundleValueBuilder;
 import net.sf.jstring.model.Bundle;
 import net.sf.jstring.model.BundleValue;
+import net.sf.jstring.support.DefaultSupportedLocales;
 import org.junit.Test;
 
 import java.net.URL;
+import java.util.Locale;
 
 import static org.junit.Assert.assertEquals;
 
@@ -22,7 +24,7 @@ public abstract class AbstractParserTest {
 	public void parse_ok() {
 		// Parsing
 		URL url = getClass().getResource(getTestFileResourcePath());
-		Bundle actualBundle = createParser().parse(url);
+		Bundle actualBundle = createParser().parse(new DefaultSupportedLocales().withLocale(Locale.FRENCH), url);
 
 		// Builds the expected bundle
 		Bundle expectedBundle = BundleBuilder.create("sample")

@@ -1,5 +1,6 @@
 package net.sf.jstring.io.xml;
 
+import net.sf.jstring.SupportedLocales;
 import net.sf.jstring.builder.BundleBuilder;
 import net.sf.jstring.builder.BundleKeyBuilder;
 import net.sf.jstring.builder.BundleSectionBuilder;
@@ -54,7 +55,7 @@ public class XMLParser extends AbstractParser<XMLParser> {
     }
 
     @Override
-    public Bundle parse(URL url) {
+    public Bundle parse(SupportedLocales supportedLocales, URL url) {
         Document dom = null;
         try {
             dom = parseDOM(url);

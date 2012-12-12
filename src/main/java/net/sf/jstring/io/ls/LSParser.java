@@ -1,5 +1,6 @@
 package net.sf.jstring.io.ls;
 
+import net.sf.jstring.SupportedLocales;
 import net.sf.jstring.builder.BundleBuilder;
 import net.sf.jstring.builder.BundleKeyBuilder;
 import net.sf.jstring.builder.BundleSectionBuilder;
@@ -48,7 +49,7 @@ public class LSParser extends AbstractParser<LSParser> {
 
 	private class ParsingContext {
 
-		private class TopParsingConsumer extends AbstractParsingConsumer {
+        private class TopParsingConsumer extends AbstractParsingConsumer {
 
 			private static final String SECTION_DEFAULT = "default";
 			private final BundleBuilder bundleBuilder;
@@ -241,11 +242,13 @@ public class LSParser extends AbstractParser<LSParser> {
 
 		}
 
+        private final SupportedLocales supportedLocales;
 		private final BundleBuilder bundleBuilder;
 
 		private final Stack<ParsingConsumer> consumerStack = new Stack<LSParser.ParsingConsumer>();
 
-		public ParsingContext(String name) {
+		public ParsingContext(SupportedLocales supportedLocales, String name) {
+            this.supportedLocales = supportedLocales;
 			bundleBuilder = BundleBuilder.create(name);
 			consumerStack.push(new TopParsingConsumer(bundleBuilder));
 		}
@@ -332,14 +335,14 @@ public class LSParser extends AbstractParser<LSParser> {
 	}
 
 	@Override
-	public Bundle parse(URL url) {
+	public Bundle parse(SupportedLocales supportedLocales, URL url) {
 		try {
 			InputStream in = url.openStream();
 			if (in == null) {
 				throw new CannotOpenException(url);
 			} else {
 				try {
-					return parse(getBundleName(url), in);
+					return parse(supportedLocales, getBundleName(url), in);
 				} finally {
 					in.close();
 				}
@@ -349,11 +352,11 @@ public class LSParser extends AbstractParser<LSParser> {
 		}
 	}
 
-	protected Bundle parse(String name, InputStream in) throws IOException {
+	protected Bundle parse(SupportedLocales supportedLocales, String name, InputStream in) throws IOException {
 		// Reader, assuming UTF-8
 		BufferedReader reader = new BufferedReader(new InputStreamReader(in, ENCODING));
 		// Parsing context
-		ParsingContext ctx = new ParsingContext(name);
+		ParsingContext ctx = new ParsingContext(supportedLocales, name);
 		// Reads line per line
 		String line;
 		int no = 1;
