@@ -5,5 +5,17 @@ public enum LocalePolicy {
     /**
      * If the locale is not defined, augment the locale scope (fr_FR -&gt; fr) until reaching the default.
      */
-    USE_DEFAULT
+    EXTENDS,
+
+    /**
+     * If the locale is not defined, uses the default
+     */
+    DEFAULT,
+
+    /**
+     * If the locale is not defined, raises an error
+     */
+    ERROR;
+
+
 }

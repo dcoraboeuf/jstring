@@ -10,3 +10,5 @@ net.sf.jstring.io.CannotParseException
 	en -> [jstring-05] Cannot parse resource {0}: {1}
 net.sf.jstring.io.ls.LSParsingException
 	en -> [jstring-06] Cannot parse LS file at line {1}:\n\tMessage: {2}\n\tLine: {0}
+net.sf.jstring.support.UnsupportedLocaleException
+    en -> [jstring-07] Locale {0} is not supported. Only {1} locales are supported.

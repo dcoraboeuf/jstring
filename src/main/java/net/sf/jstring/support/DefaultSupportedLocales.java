@@ -5,10 +5,14 @@ import net.sf.jstring.LocalePolicy;
 import net.sf.jstring.SupportedLocales;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.Validate;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class DefaultSupportedLocales implements SupportedLocales {
+
+    private final Logger logger = LoggerFactory.getLogger(SupportedLocales.class);
 
     private final ImmutableList<Locale> locales;
     private final LocalePolicy localePolicy;
@@ -22,7 +26,7 @@ public class DefaultSupportedLocales implements SupportedLocales {
     }
 
     public DefaultSupportedLocales(List<Locale> locales) {
-        this(LocalePolicy.USE_DEFAULT, locales);
+        this(LocalePolicy.EXTENDS, locales);
     }
 
     public DefaultSupportedLocales(LocalePolicy localePolicy, List<Locale> locales) {
@@ -47,14 +51,19 @@ public class DefaultSupportedLocales implements SupportedLocales {
         if (locales.contains(locale)) {
             return locale;
         } else {
+            logger.warn("[locales] Locale {} is not supported", locale);
             switch (localePolicy) {
-                case USE_DEFAULT:
+                case EXTENDS:
                     List<Locale> candidates = LocaleUtils.localeLookupList(locale, getDefaultLocale());
                     if (candidates.size() > 1) {
                         return filter(candidates.get(1));
                     } else {
                         return getDefaultLocale();
                     }
+                case DEFAULT:
+                    return getDefaultLocale();
+                case ERROR:
+                    throw new UnsupportedLocaleException (locale, getSupportedLocales());
                 default:
                     throw new IllegalStateException("Unknown locale policy: " + localePolicy);
             }
