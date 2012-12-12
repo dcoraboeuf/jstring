@@ -16,6 +16,7 @@ public class DefaultSupportedLocales implements SupportedLocales {
 
     private final ImmutableList<Locale> locales;
     private final LocalePolicy localeParsingPolicy;
+    private final LocalePolicy localeLookupPolicy;
 
     public DefaultSupportedLocales() {
         this(Locale.ENGLISH);
@@ -26,13 +27,15 @@ public class DefaultSupportedLocales implements SupportedLocales {
     }
 
     public DefaultSupportedLocales(List<Locale> locales) {
-        this(LocalePolicy.ERROR, locales);
+        this(LocalePolicy.ERROR, LocalePolicy.EXTENDS, locales);
     }
 
-    public DefaultSupportedLocales(LocalePolicy localeParsingPolicy, List<Locale> locales) {
-        Validate.notNull(localeParsingPolicy, "Locale policy must be defined");
+    public DefaultSupportedLocales(LocalePolicy localeParsingPolicy, LocalePolicy localeLookupPolicy, List<Locale> locales) {
+        Validate.notNull(localeParsingPolicy, "Locale parsing policy must be defined");
+        Validate.notNull(localeLookupPolicy, "Locale lookup policy must be defined");
         Validate.notEmpty(locales, "List of locales must contain at least one element");
         this.localeParsingPolicy = localeParsingPolicy;
+        this.localeLookupPolicy = localeLookupPolicy;
         this.locales = ImmutableList.copyOf(locales);
     }
 
@@ -46,13 +49,12 @@ public class DefaultSupportedLocales implements SupportedLocales {
         return locales;
     }
 
-    @Override
-    public Locale filterForParsing(Locale locale) {
+    protected Locale filter(Locale locale, LocalePolicy policy) {
         if (locales.contains(locale)) {
             return locale;
         } else {
             logger.warn("[locales] Locale {} is not supported", locale);
-            switch (localeParsingPolicy) {
+            switch (policy) {
                 case EXTENDS:
                     List<Locale> candidates = LocaleUtils.localeLookupList(locale, getDefaultLocale());
                     if (candidates.size() > 1) {
@@ -71,13 +73,33 @@ public class DefaultSupportedLocales implements SupportedLocales {
     }
 
     @Override
+    public Locale filterForParsing(Locale locale) {
+        return filter(locale, localeParsingPolicy);
+    }
+
+    @Override
+    public Locale filterForLookup(Locale locale) {
+        return filter(locale, localeLookupPolicy);
+    }
+
+    @Override
     public SupportedLocales withLocaleParsingPolicy(LocalePolicy localeParsingPolicy) {
-        return new DefaultSupportedLocales(localeParsingPolicy, locales);
+        return new DefaultSupportedLocales(localeParsingPolicy, localeLookupPolicy, locales);
+    }
+
+    @Override
+    public SupportedLocales withLocaleLookupPolicy(LocalePolicy localeLookupPolicy) {
+        return new DefaultSupportedLocales(localeParsingPolicy, localeLookupPolicy, locales);
     }
 
     @Override
     public LocalePolicy getLocaleParsingPolicy() {
         return localeParsingPolicy;
+    }
+
+    @Override
+    public LocalePolicy getLocaleLookupPolicy() {
+        return localeLookupPolicy;
     }
 
     @Override

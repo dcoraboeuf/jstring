@@ -16,7 +16,13 @@ public interface SupportedLocales {
 
     SupportedLocales withLocaleParsingPolicy(LocalePolicy localeParsingPolicy);
 
+    SupportedLocales withLocaleLookupPolicy(LocalePolicy localeLookupPolicy);
+
     Locale filterForParsing(Locale locale);
 
+    Locale filterForLookup(Locale locale);
+
     LocalePolicy getLocaleParsingPolicy();
+
+    LocalePolicy getLocaleLookupPolicy();
 }

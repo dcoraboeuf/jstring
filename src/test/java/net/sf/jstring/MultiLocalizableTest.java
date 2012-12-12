@@ -20,7 +20,7 @@ public class MultiLocalizableTest {
 
     @Before
     public void before() {
-		strings = new StringsLoader().withPolicy(LocalePolicy.EXTENDS).withPaths("test/ls/sampleStrings.ls").load();
+		strings = new StringsLoader().withParsingPolicy(LocalePolicy.EXTENDS).withPaths("test/ls/sampleStrings.ls").load();
     }
 
     @Test

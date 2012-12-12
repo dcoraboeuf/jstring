@@ -90,9 +90,14 @@ public class StringsLoader {
         return new StringsLoader(parserFactory, formatter, fallback, locales, autoDiscover, paths, traces);
     }
 
-    public StringsLoader withPolicy (LocalePolicy policy) {
+    public StringsLoader withParsingPolicy(LocalePolicy policy) {
         Validate.notNull(policy, "Policy must not be null");
         return new StringsLoader(parserFactory, formatter, fallback, supportedLocales.withLocaleParsingPolicy(policy), autoDiscover, paths, traces);
+    }
+
+    public StringsLoader withLookupPolicy(LocalePolicy policy) {
+        Validate.notNull(policy, "Policy must not be null");
+        return new StringsLoader(parserFactory, formatter, fallback, supportedLocales.withLocaleLookupPolicy(policy), autoDiscover, paths, traces);
     }
 	
 	public StringsLoader withPaths(String... paths) {

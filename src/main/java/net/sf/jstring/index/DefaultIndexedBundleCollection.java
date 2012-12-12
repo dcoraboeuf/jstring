@@ -74,8 +74,10 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 		try {
 			// Result
 			Map<String, String> result = new HashMap<String, String>();
+            // Target locale
+            Locale targetLocale = supportedLocales.filterForLookup(locale);
 			// List of locales
-			List<Locale> locales = new ArrayList<Locale>(LocaleUtils.localeLookupList(locale, supportedLocales.getDefaultLocale()));
+			List<Locale> locales = new ArrayList<Locale>(LocaleUtils.localeLookupList(targetLocale, supportedLocales.getDefaultLocale()));
 			// Loops in reverse order
 			Collections.reverse(locales);
 			for (Locale currentLocale : locales) {
@@ -98,8 +100,10 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 		Lock lock = indexLock.readLock();
 		lock.lock();
 		try {
+            // Target locale
+            Locale targetLocale = supportedLocales.filterForLookup(locale);
 			// List of locales
-			List<Locale> locales = LocaleUtils.localeLookupList(locale, supportedLocales.getDefaultLocale());
+			List<Locale> locales = LocaleUtils.localeLookupList(targetLocale, supportedLocales.getDefaultLocale());
 			for (Locale currentLocale : locales) {
 				// Gets the language map
 				Map<String, String> map = index.get(currentLocale);
