@@ -13,4 +13,10 @@ public interface SupportedLocales {
     Collection<Locale> getSupportedLocales();
 
     SupportedLocales withLocale(Locale locale);
+
+    SupportedLocales withPolicy(LocalePolicy localePolicy);
+
+    Locale filter(Locale locale);
+
+    LocalePolicy getLocalePolicy();
 }

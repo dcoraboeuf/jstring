@@ -67,7 +67,7 @@ public class XMLParser extends AbstractParser<XMLParser> {
         } catch (SAXException e) {
             throw new CannotParseException(url, e);
         }
-        return parse(dom, getBundleName(url));
+        return parse(dom, getBundleName(url), supportedLocales);
     }
 
     private Document parseDOM(URL url) throws IOException, ParserConfigurationException, SAXException {
@@ -94,7 +94,7 @@ public class XMLParser extends AbstractParser<XMLParser> {
         }
     }
 
-    private Bundle parse(Document dom, String name) {
+    private Bundle parse(Document dom, String name, final SupportedLocales supportedLocales) {
         final BundleBuilder builder = BundleBuilder.create(name);
         // Top comments
         each(
@@ -113,7 +113,7 @@ public class XMLParser extends AbstractParser<XMLParser> {
                 new ElementIterator() {
                     @Override
                     public void onElement(int index, Element keyNode) {
-                        defaultSection.key(parseKey((Element) keyNode));
+                        defaultSection.key(parseKey((Element) keyNode, supportedLocales));
                     }
                 }
         );
@@ -127,7 +127,7 @@ public class XMLParser extends AbstractParser<XMLParser> {
                 new ElementIterator() {
                     @Override
                     public void onElement(int index, Element node) {
-                        parseSection(builder,  node);
+                        parseSection(builder,  node, supportedLocales);
                     }
                 }
         );
@@ -135,7 +135,7 @@ public class XMLParser extends AbstractParser<XMLParser> {
         return builder.build();
     }
 
-    private void parseSection(BundleBuilder builder, Element sectionNode) {
+    private void parseSection(BundleBuilder builder, Element sectionNode, final SupportedLocales supportedLocales) {
         final BundleSectionBuilder section = BundleSectionBuilder.create(sectionNode.getAttribute("name"));
         // Comments
         each(
@@ -153,7 +153,7 @@ public class XMLParser extends AbstractParser<XMLParser> {
                 new ElementIterator() {
                     @Override
                     public void onElement(int index, Element node) {
-                        section.key(parseKey(node));
+                        section.key(parseKey(node, supportedLocales));
                     }
                 }
         );
@@ -161,7 +161,7 @@ public class XMLParser extends AbstractParser<XMLParser> {
         builder.section(section.build());
     }
 
-    private BundleKey parseKey(Element keyNode) {
+    private BundleKey parseKey(Element keyNode, final SupportedLocales supportedLocales) {
         String name = keyNode.getAttribute("name");
         final BundleKeyBuilder key = BundleKeyBuilder.create(name);
         // Comments
@@ -180,7 +180,7 @@ public class XMLParser extends AbstractParser<XMLParser> {
                 new ElementIterator() {
                     @Override
                     public void onElement (int index, Element node) {
-                        parseValue(key, node);
+                        parseValue(key, node, supportedLocales);
                     }
                 }
         );
@@ -188,10 +188,10 @@ public class XMLParser extends AbstractParser<XMLParser> {
         return key.build();
     }
 
-    private void parseValue(BundleKeyBuilder key, Element valueNode) {
+    private void parseValue(BundleKeyBuilder key, Element valueNode, SupportedLocales supportedLocales) {
         String languageValue = valueNode.getAttribute("lang");
         // List of languages
-        List<Locale> languages = getLanguages(languageValue);
+        List<Locale> languages = getLanguages(supportedLocales, languageValue);
         final BundleValueBuilder valueBuilder = BundleValueBuilder.create();
         // Gets all comments
         each (
@@ -215,7 +215,6 @@ public class XMLParser extends AbstractParser<XMLParser> {
         }
         // OK
         for (Locale language: languages) {
-            // FIXME Checks if locale is supported
             key.value(language, valueBuilder.build());
         }
     }

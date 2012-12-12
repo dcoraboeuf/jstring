@@ -163,7 +163,7 @@ public class LSParser extends AbstractParser<LSParser> {
 						if (m.matches()) {
 							String languageValue = trim(m.group(1));
                             // List of languages
-                            List<Locale> languages = getLanguages(languageValue);
+                            List<Locale> languages = getLanguages(supportedLocales, languageValue);
                             // Value
 							String value = trim(m.group(2));
 							// ... special value, that indicates that the value
@@ -171,7 +171,6 @@ public class LSParser extends AbstractParser<LSParser> {
 							if (MULTILINE_SEPARATOR.equals(value)) {
 								// Starts the parsing of the value
                                 for (Locale language: languages) {
-                                    // FIXME Checks if the locale is supported
 								    newValue(keyBuilder, language);
                                 }
 							}
@@ -181,7 +180,6 @@ public class LSParser extends AbstractParser<LSParser> {
 								value = StringEscapeUtils.unescapeJava(value);
 								// Adds the value
                                 for (Locale language: languages) {
-                                    // FIXME Checks if the locale is supported
 								    keyBuilder.value(language, BundleValue.value(value));
                                 }
 							}

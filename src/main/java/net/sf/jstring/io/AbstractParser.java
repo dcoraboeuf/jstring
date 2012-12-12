@@ -2,14 +2,13 @@ package net.sf.jstring.io;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Lists;
+import net.sf.jstring.SupportedLocales;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URL;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 
 public abstract class AbstractParser<P extends AbstractParser<P>> implements Parser<P> {
 
@@ -41,8 +40,9 @@ public abstract class AbstractParser<P extends AbstractParser<P>> implements Par
         return path;
     }
 
-    protected List<Locale> getLanguages(String languageValue) {
-        return Lists.transform(
+    protected List<Locale> getLanguages(SupportedLocales supportedLocales, String languageValue) {
+        // Gets the list of languages
+        List<Locale> locales = Lists.transform(
                 Arrays.asList(StringUtils.split(languageValue, LANGUAGE_SEPARATOR)),
                 new Function<String, Locale>() {
                     @Override
@@ -51,6 +51,18 @@ public abstract class AbstractParser<P extends AbstractParser<P>> implements Par
                     }
                 }
             );
+        // Final list
+        Set<Locale> filteredLocales = new LinkedHashSet<Locale>();
+        for (Locale locale : locales) {
+            // Filtering
+            Locale filteredLocale = supportedLocales.filter (locale);
+            // OK for this locale
+            if (filteredLocale != null) {
+                filteredLocales.add(locale);
+            }
+        }
+        // OK
+        return new ArrayList<Locale>(filteredLocales);
     }
 
 }
