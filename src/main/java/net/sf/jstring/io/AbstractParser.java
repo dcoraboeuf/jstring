@@ -12,6 +12,8 @@ import java.util.*;
 
 public abstract class AbstractParser<P extends AbstractParser<P>> implements Parser<P> {
 
+    public static final String ENCODING = "UTF-8";
+
     public static final String LANGUAGE_SEPARATOR = ",";
 
     protected final Logger logger = LoggerFactory.getLogger(Parser.class);

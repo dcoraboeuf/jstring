@@ -28,8 +28,6 @@ import static org.apache.commons.lang3.StringUtils.*;
 
 public class LSParser extends AbstractParser<LSParser> {
 
-	private static final String ENCODING = "UTF-8";
-
 	private static final String COMMENT_PREFIX = "#";
 	private static final String ESCAPED_COMMENT_PREFIX = "##";
 	private static final String MULTILINE_SEPARATOR = "...";

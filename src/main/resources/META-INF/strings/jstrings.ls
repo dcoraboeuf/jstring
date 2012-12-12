@@ -12,3 +12,5 @@ net.sf.jstring.io.ls.LSParsingException
 	en -> [jstring-06] Cannot parse LS file at line {1}:\n\tMessage: {2}\n\tLine: {0}
 net.sf.jstring.support.UnsupportedLocaleException
     en -> [jstring-07] Locale {0} is not supported. Only {1} locales are supported.
+net.sf.jstring.io.properties.PropertiesParsingException
+    en -> [jstring-08] Cannot parse properties file at line {0}:\n\tMessage: {2}\n\tLine: {1}
