@@ -1,30 +1,21 @@
 package net.sf.jstring.index;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
+import net.sf.jstring.model.*;
+import org.apache.commons.lang3.LocaleUtils;
+import org.apache.commons.lang3.Validate;
+
+import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
-
-import net.sf.jstring.model.Bundle;
-import net.sf.jstring.model.BundleCollection;
-import net.sf.jstring.model.BundleKey;
-import net.sf.jstring.model.BundleSection;
-import net.sf.jstring.model.BundleValue;
-
-import org.apache.commons.lang3.LocaleUtils;
-import org.apache.commons.lang3.Validate;
 
 public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 
 	private final ReadWriteLock indexLock = new ReentrantReadWriteLock();
 
-	private final Map<String, Map<String, String>> index = new HashMap<String, Map<String, String>>();
+	private final Map<Locale, Map<String, String>> index = new HashMap<Locale, Map<String, String>>();
 
+    // FIXME Uses supported locales interface
 	private final Locale defaultLocale;
     private BundleCollection bundleCollection;
 
@@ -43,8 +34,8 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 				for (BundleSection section : bundle.getSections()) {
 					for (BundleKey bundleKey : section.getKeys()) {
 						String key = bundleKey.getName();
-						for (Map.Entry<String, BundleValue> bundleValueEntry : bundleKey.getValues().entrySet()) {
-							String language = bundleValueEntry.getKey();
+						for (Map.Entry<Locale, BundleValue> bundleValueEntry : bundleKey.getValues().entrySet()) {
+                            Locale language = bundleValueEntry.getKey();
 							String value = bundleValueEntry.getValue().getValue();
 							Map<String, String> languageIndex = index.get(language);
 							if (languageIndex == null) {
@@ -83,10 +74,8 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 			// Loops in reverse order
 			Collections.reverse(locales);
 			for (Locale currentLocale : locales) {
-				// Gets the string out of the locale
-				String language = currentLocale.toString();
 				// Gets the language map
-				Map<String, String> map = index.get(language);
+				Map<String, String> map = index.get(currentLocale);
 				// If map is defined, includes it
 				if (map != null) {
 					result.putAll(map);
@@ -107,10 +96,8 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 			// List of locales
 			List<Locale> locales = LocaleUtils.localeLookupList(locale, defaultLocale);
 			for (Locale currentLocale : locales) {
-				// Gets the string out of the locale
-				String language = currentLocale.toString();
 				// Gets the language map
-				Map<String, String> map = index.get(language);
+				Map<String, String> map = index.get(currentLocale);
 				// If map is defined and contains the key
 				if (map != null && map.containsKey(key)) {
 					return map.get(key);

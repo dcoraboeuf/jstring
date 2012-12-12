@@ -1,10 +1,15 @@
 package net.sf.jstring.io;
 
+import com.google.common.base.Function;
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.net.URL;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Locale;
 
 public abstract class AbstractParser<P extends AbstractParser<P>> implements Parser<P> {
 
@@ -36,8 +41,16 @@ public abstract class AbstractParser<P extends AbstractParser<P>> implements Par
         return path;
     }
 
-    protected String[] getLanguages(String languageValue) {
-        return StringUtils.split(languageValue, LANGUAGE_SEPARATOR);
+    protected List<Locale> getLanguages(String languageValue) {
+        return Lists.transform(
+                Arrays.asList(StringUtils.split(languageValue, LANGUAGE_SEPARATOR)),
+                new Function<String, Locale>() {
+                    @Override
+                    public Locale apply(String name) {
+                        return new Locale(name);
+                    }
+                }
+            );
     }
 
 }

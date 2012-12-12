@@ -32,6 +32,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class XMLParser extends AbstractParser<XMLParser> {
 
@@ -190,7 +191,7 @@ public class XMLParser extends AbstractParser<XMLParser> {
     private void parseValue(BundleKeyBuilder key, Element valueNode) {
         String languageValue = valueNode.getAttribute("lang");
         // List of languages
-        String[] languages = getLanguages(languageValue);
+        List<Locale> languages = getLanguages(languageValue);
         final BundleValueBuilder valueBuilder = BundleValueBuilder.create();
         // Gets all comments
         each (
@@ -213,7 +214,8 @@ public class XMLParser extends AbstractParser<XMLParser> {
             }
         }
         // OK
-        for (String language: languages) {
+        for (Locale language: languages) {
+            // FIXME Checks if locale is supported
             key.value(language, valueBuilder.build());
         }
     }

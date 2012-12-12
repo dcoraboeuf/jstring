@@ -18,6 +18,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URL;
+import java.util.List;
+import java.util.Locale;
 import java.util.Stack;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -161,14 +163,15 @@ public class LSParser extends AbstractParser<LSParser> {
 						if (m.matches()) {
 							String languageValue = trim(m.group(1));
                             // List of languages
-                            String[] languages = getLanguages(languageValue);
+                            List<Locale> languages = getLanguages(languageValue);
                             // Value
 							String value = trim(m.group(2));
 							// ... special value, that indicates that the value
 							// is stored on several lines
 							if (MULTILINE_SEPARATOR.equals(value)) {
 								// Starts the parsing of the value
-                                for (String language: languages) {
+                                for (Locale language: languages) {
+                                    // FIXME Checks if the locale is supported
 								    newValue(keyBuilder, language);
                                 }
 							}
@@ -177,7 +180,8 @@ public class LSParser extends AbstractParser<LSParser> {
 								// Resolve the escaping
 								value = StringEscapeUtils.unescapeJava(value);
 								// Adds the value
-                                for (String language: languages) {
+                                for (Locale language: languages) {
+                                    // FIXME Checks if the locale is supported
 								    keyBuilder.value(language, BundleValue.value(value));
                                 }
 							}
@@ -204,10 +208,10 @@ public class LSParser extends AbstractParser<LSParser> {
 		private class ValueParsingConsumer extends AbstractParsingConsumer {
 			
 			private final BundleKeyBuilder keyBuilder;
-			private final String language;
+			private final Locale language;
 			private final BundleValueBuilder valueBuilder;
 
-			public ValueParsingConsumer(BundleKeyBuilder keyBuilder, String language) {
+			public ValueParsingConsumer(BundleKeyBuilder keyBuilder, Locale language) {
 				this.keyBuilder = keyBuilder;
 				this.language = language;
 				this.valueBuilder = BundleValueBuilder.create();
@@ -272,7 +276,7 @@ public class LSParser extends AbstractParser<LSParser> {
 			consumerStack.push(new KeyParsingConsumer(sectionBuilder, key));
 		}
 
-		public void newValue(BundleKeyBuilder keyBuilder, String language) {
+		public void newValue(BundleKeyBuilder keyBuilder, Locale language) {
 			closeUntil(KeyParsingConsumer.class);
 			consumerStack.push(new ValueParsingConsumer(keyBuilder, language));
 		}

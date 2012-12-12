@@ -1,9 +1,6 @@
 package net.sf.jstring.builder;
 
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 import net.sf.jstring.model.BundleKey;
 import net.sf.jstring.model.BundleValue;
@@ -19,7 +16,7 @@ public class BundleKeyBuilder extends Builder<BundleKey> {
 
 	private final String name;
 	private final List<String> comments = new ArrayList<String>();
-	private final Map<String, BundleValue> values = new LinkedHashMap<String, BundleValue>();
+	private final Map<Locale, BundleValue> values = new LinkedHashMap<Locale, BundleValue>();
 
 	private BundleKeyBuilder(String name) {
 		this.name = name;
@@ -34,7 +31,7 @@ public class BundleKeyBuilder extends Builder<BundleKey> {
 		return this;
 	}
 
-	public BundleKeyBuilder value(String language, BundleValue value) {
+	public BundleKeyBuilder value(Locale language, BundleValue value) {
 		values.put(language, value);
 		return this;
 	}
