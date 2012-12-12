@@ -15,7 +15,7 @@ public class DefaultSupportedLocales implements SupportedLocales {
     private final Logger logger = LoggerFactory.getLogger(SupportedLocales.class);
 
     private final ImmutableList<Locale> locales;
-    private final LocalePolicy localePolicy;
+    private final LocalePolicy localeParsingPolicy;
 
     public DefaultSupportedLocales() {
         this(Locale.ENGLISH);
@@ -29,10 +29,10 @@ public class DefaultSupportedLocales implements SupportedLocales {
         this(LocalePolicy.ERROR, locales);
     }
 
-    public DefaultSupportedLocales(LocalePolicy localePolicy, List<Locale> locales) {
-        Validate.notNull(localePolicy, "Locale policy must be defined");
+    public DefaultSupportedLocales(LocalePolicy localeParsingPolicy, List<Locale> locales) {
+        Validate.notNull(localeParsingPolicy, "Locale policy must be defined");
         Validate.notEmpty(locales, "List of locales must contain at least one element");
-        this.localePolicy = localePolicy;
+        this.localeParsingPolicy = localeParsingPolicy;
         this.locales = ImmutableList.copyOf(locales);
     }
 
@@ -47,16 +47,16 @@ public class DefaultSupportedLocales implements SupportedLocales {
     }
 
     @Override
-    public Locale filter(Locale locale) {
+    public Locale filterForParsing(Locale locale) {
         if (locales.contains(locale)) {
             return locale;
         } else {
             logger.warn("[locales] Locale {} is not supported", locale);
-            switch (localePolicy) {
+            switch (localeParsingPolicy) {
                 case EXTENDS:
                     List<Locale> candidates = LocaleUtils.localeLookupList(locale, getDefaultLocale());
                     if (candidates.size() > 1) {
-                        return filter(candidates.get(1));
+                        return filterForParsing(candidates.get(1));
                     } else {
                         return getDefaultLocale();
                     }
@@ -65,19 +65,19 @@ public class DefaultSupportedLocales implements SupportedLocales {
                 case ERROR:
                     throw new UnsupportedLocaleException (locale, getSupportedLocales());
                 default:
-                    throw new IllegalStateException("Unknown locale policy: " + localePolicy);
+                    throw new IllegalStateException("Unknown locale policy: " + localeParsingPolicy);
             }
         }
     }
 
     @Override
-    public SupportedLocales withPolicy(LocalePolicy localePolicy) {
-        return new DefaultSupportedLocales(localePolicy, locales);
+    public SupportedLocales withLocaleParsingPolicy(LocalePolicy localeParsingPolicy) {
+        return new DefaultSupportedLocales(localeParsingPolicy, locales);
     }
 
     @Override
-    public LocalePolicy getLocalePolicy() {
-        return localePolicy;
+    public LocalePolicy getLocaleParsingPolicy() {
+        return localeParsingPolicy;
     }
 
     @Override

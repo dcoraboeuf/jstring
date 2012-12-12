@@ -14,9 +14,9 @@ public interface SupportedLocales {
 
     SupportedLocales withLocale(Locale locale);
 
-    SupportedLocales withPolicy(LocalePolicy localePolicy);
+    SupportedLocales withLocaleParsingPolicy(LocalePolicy localeParsingPolicy);
 
-    Locale filter(Locale locale);
+    Locale filterForParsing(Locale locale);
 
-    LocalePolicy getLocalePolicy();
+    LocalePolicy getLocaleParsingPolicy();
 }

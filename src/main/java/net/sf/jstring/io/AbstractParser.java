@@ -55,7 +55,7 @@ public abstract class AbstractParser<P extends AbstractParser<P>> implements Par
         Set<Locale> filteredLocales = new LinkedHashSet<Locale>();
         for (Locale locale : locales) {
             // Filtering
-            Locale filteredLocale = supportedLocales.filter (locale);
+            Locale filteredLocale = supportedLocales.filterForParsing(locale);
             // OK for this locale
             if (filteredLocale != null) {
                 filteredLocales.add(locale);

@@ -92,7 +92,7 @@ public class StringsLoader {
 
     public StringsLoader withPolicy (LocalePolicy policy) {
         Validate.notNull(policy, "Policy must not be null");
-        return new StringsLoader(parserFactory, formatter, fallback, supportedLocales.withPolicy(policy), autoDiscover, paths, traces);
+        return new StringsLoader(parserFactory, formatter, fallback, supportedLocales.withLocaleParsingPolicy(policy), autoDiscover, paths, traces);
     }
 	
 	public StringsLoader withPaths(String... paths) {
