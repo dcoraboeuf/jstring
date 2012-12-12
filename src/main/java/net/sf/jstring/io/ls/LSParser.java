@@ -34,7 +34,7 @@ public class LSParser extends AbstractParser<LSParser> {
 	private static final Pattern SECTION_PATTERN = Pattern.compile("^\\[(.*)\\]$");
 	private static final Pattern LANGUAGE_VALUE_PATTERN = Pattern.compile("^(.+)\\->(.*)$");
 
-	private static interface ParsingConsumer {
+    private static interface ParsingConsumer {
 
 		void consume(String line, int lineNo);
 
@@ -158,20 +158,27 @@ public class LSParser extends AbstractParser<LSParser> {
 						// Language & value
 						Matcher m = LANGUAGE_VALUE_PATTERN.matcher(line);
 						if (m.matches()) {
-							String language = trim(m.group(1));
+							String languageValue = trim(m.group(1));
+                            // List of languages
+                            String[] languages = getLanguages(languageValue);
+                            // Value
 							String value = trim(m.group(2));
 							// ... special value, that indicates that the value
 							// is stored on several lines
 							if (MULTILINE_SEPARATOR.equals(value)) {
 								// Starts the parsing of the value
-								newValue(keyBuilder, language);
+                                for (String language: languages) {
+								    newValue(keyBuilder, language);
+                                }
 							}
 							// Direct value
 							else {
 								// Resolve the escaping
 								value = StringEscapeUtils.unescapeJava(value);
 								// Adds the value
-								keyBuilder.value(language, BundleValue.value(value));
+                                for (String language: languages) {
+								    keyBuilder.value(language, BundleValue.value(value));
+                                }
 							}
 						} else {
 							// Any other, that is another key

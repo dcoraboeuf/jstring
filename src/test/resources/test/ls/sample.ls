@@ -1,9 +1,9 @@
 # Sample localized strings for unit tests
 
 list.separator.prefix
-	en -> -\u0020
+	en,fr -> -\u0020
 list.separator.suffix
-	en -> \n
+	en,fr -> \n
 
 [general]
 # General section

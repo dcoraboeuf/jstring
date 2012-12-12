@@ -8,6 +8,8 @@ import java.net.URL;
 
 public abstract class AbstractParser<P extends AbstractParser<P>> implements Parser<P> {
 
+    public static final String LANGUAGE_SEPARATOR = ",";
+
     protected final Logger logger = LoggerFactory.getLogger(Parser.class);
 
     private final boolean trace;
@@ -32,6 +34,10 @@ public abstract class AbstractParser<P extends AbstractParser<P>> implements Par
         path = StringUtils.substringAfterLast(path, "/");
         path = StringUtils.substringBeforeLast(path, ".");
         return path;
+    }
+
+    protected String[] getLanguages(String languageValue) {
+        return StringUtils.split(languageValue, LANGUAGE_SEPARATOR);
     }
 
 }

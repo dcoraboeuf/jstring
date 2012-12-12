@@ -1,10 +1,10 @@
 <localization xmlns="http://jstring.sf.net/xml">
     <comment>Sample localized strings for unit tests</comment>
     <key name="list.separator.prefix">
-        <value lang="en">-\u0020</value>
+        <value lang="en,fr">-\u0020</value>
     </key>
     <key name="list.separator.suffix">
-        <value lang="en">\n</value>
+        <value lang="en,fr">\n</value>
     </key>
     <section name="general">
         <comment>General section</comment>

@@ -1,20 +1,5 @@
 package net.sf.jstring.io.xml;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.xml.XMLConstants;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.validation.Schema;
-import javax.xml.validation.SchemaFactory;
-import javax.xml.validation.Validator;
-
 import net.sf.jstring.builder.BundleBuilder;
 import net.sf.jstring.builder.BundleKeyBuilder;
 import net.sf.jstring.builder.BundleSectionBuilder;
@@ -25,7 +10,6 @@ import net.sf.jstring.io.CannotParseException;
 import net.sf.jstring.model.Bundle;
 import net.sf.jstring.model.BundleKey;
 import net.sf.jstring.model.BundleSection;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -33,6 +17,20 @@ import org.w3c.dom.Element;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
+
+import javax.xml.XMLConstants;
+import javax.xml.parsers.DocumentBuilder;
+import javax.xml.parsers.DocumentBuilderFactory;
+import javax.xml.parsers.ParserConfigurationException;
+import javax.xml.transform.dom.DOMSource;
+import javax.xml.validation.Schema;
+import javax.xml.validation.SchemaFactory;
+import javax.xml.validation.Validator;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 
 public class XMLParser extends AbstractParser<XMLParser> {
 
@@ -180,7 +178,7 @@ public class XMLParser extends AbstractParser<XMLParser> {
                 new ElementIterator() {
                     @Override
                     public void onElement (int index, Element node) {
-                        parseValue (key, node);
+                        parseValue(key, node);
                     }
                 }
         );
@@ -189,7 +187,9 @@ public class XMLParser extends AbstractParser<XMLParser> {
     }
 
     private void parseValue(BundleKeyBuilder key, Element valueNode) {
-        String language = valueNode.getAttribute("lang");
+        String languageValue = valueNode.getAttribute("lang");
+        // List of languages
+        String[] languages = getLanguages(languageValue);
         final BundleValueBuilder valueBuilder = BundleValueBuilder.create();
         // Gets all comments
         each (
@@ -212,7 +212,9 @@ public class XMLParser extends AbstractParser<XMLParser> {
             }
         }
         // OK
-        key.value(language, valueBuilder.build());
+        for (String language: languages) {
+            key.value(language, valueBuilder.build());
+        }
     }
 
     private void each (Element parent, String tagName, ElementIterator iterator) {
