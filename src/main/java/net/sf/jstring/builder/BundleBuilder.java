@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Set;
 
 import net.sf.jstring.model.Bundle;
+import net.sf.jstring.model.BundleSection;
 
 import com.google.common.collect.Collections2;
 import com.google.common.collect.ImmutableList;
@@ -60,10 +61,25 @@ public class BundleBuilder extends Builder<Bundle> {
     protected void merge(Bundle bundle) {
         // Comments
     	mergeComments(bundle.getComments());
-        // TODO Sections
+        // Sections
+    	mergeSections(bundle.getSections());
     }
 
-    // TODO Uses an abstract BundleCommented level
+    private void mergeSections(ImmutableList<BundleSection> sourceSections) {
+    	for (BundleSection sourceSection : sourceSections) {
+			String name = sourceSection.getName();
+			BundleSectionBuilder section = sections.get(name);
+			if (section != null) {
+				section.merge(sourceSection);
+			} else {
+				BundleSectionBuilder sectionBuilder = BundleSectionBuilder.create(name);
+				sectionBuilder.merge(sourceSection);
+				section(sectionBuilder);
+			}
+		}
+	}
+
+	// TODO Uses an abstract BundleCommented level
 	private void mergeComments(Collection<String> source) {
 		// Converts the target as a set (preserving order)
 		Set<String> targetSet = new LinkedHashSet<String>(comments);

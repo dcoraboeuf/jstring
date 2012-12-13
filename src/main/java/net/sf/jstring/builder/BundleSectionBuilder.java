@@ -50,4 +50,9 @@ public class BundleSectionBuilder extends Builder<BundleSection> {
                 ));
 	}
 
+	public void merge(BundleSection section) {
+		// FIXME Implement BundleSectionBuilder.merge
+		
+	}
+
 }
