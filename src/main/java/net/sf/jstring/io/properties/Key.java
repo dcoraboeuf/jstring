@@ -1,7 +1,5 @@
 package net.sf.jstring.io.properties;
 
-import java.util.Collections;
-import java.util.List;
 
 public class Key extends AbstractToken {
 

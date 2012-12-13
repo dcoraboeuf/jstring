@@ -43,7 +43,7 @@ public class BundleBuilder extends Builder<Bundle> {
 
     public BundleSectionBuilder getDefaultSectionBuilder() {
         if (defaultSectionBuilder == null) {
-            defaultSectionBuilder = BundleSectionBuilder.create("default");
+            defaultSectionBuilder = BundleSectionBuilder.create(Bundle.DEFAULT_SECTION);
         }
         return defaultSectionBuilder;
     }

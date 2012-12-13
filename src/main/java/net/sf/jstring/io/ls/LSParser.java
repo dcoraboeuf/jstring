@@ -50,7 +50,6 @@ public class LSParser extends AbstractParser<LSParser> {
 
         private class TopParsingConsumer extends AbstractParsingConsumer {
 
-			private static final String SECTION_DEFAULT = "default";
 			private final BundleBuilder bundleBuilder;
 
 			private TopParsingConsumer(BundleBuilder bundleBuilder) {
@@ -75,7 +74,7 @@ public class LSParser extends AbstractParser<LSParser> {
 						newSection(section);
 					} else {
 						// Default section
-						BundleSectionBuilder sectionBuilder = newSection(SECTION_DEFAULT);
+						BundleSectionBuilder sectionBuilder = newSection(Bundle.DEFAULT_SECTION);
 						// Starts the key
 						newKey(sectionBuilder, line);
 					}
