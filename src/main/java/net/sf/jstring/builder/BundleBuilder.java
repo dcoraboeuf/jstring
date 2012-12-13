@@ -5,7 +5,10 @@ import com.google.common.collect.Lists;
 import net.sf.jstring.model.Bundle;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Set;
 
 public class BundleBuilder extends Builder<Bundle> {
 
@@ -53,8 +56,24 @@ public class BundleBuilder extends Builder<Bundle> {
     }
 
     protected void merge(Bundle bundle) {
-        // TODO Comments
+        // Comments
+    	mergeComments(bundle.getComments());
         // TODO Top keys
         // TODO Sections
     }
+
+    // TODO Uses an abstract BundleCommented level
+	private void mergeComments(Collection<String> source) {
+		// Converts the target as a set (preserving order)
+		Set<String> targetSet = new LinkedHashSet<String>(comments);
+		// Adds all items of the source if they are not there yet
+		List<String> itemsToAdd = new ArrayList<String>();
+		for (String e: source) {
+			if (!targetSet.contains(e)) {
+				itemsToAdd.add(e);
+			}
+		}
+		// Adds those new items to the target
+		comments.addAll(itemsToAdd);
+	}
 }
