@@ -19,6 +19,7 @@ import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
@@ -58,7 +59,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
             // Parses the URL as tokens
             List<Token> tokens = readTokens(localeURL);
             // Parses the token for this language
-            parseTokens (tokens, builder, locale, supportedLocales);
+            parseTokens(tokens, builder, locale, supportedLocales);
         }
 
         // Bundle
@@ -203,8 +204,6 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
         private final SupportedLocales supportedLocales;
         private final Stack<TokenParser> parserStack;
 
-        private BundleSectionBuilder defaultSection;
-
         public TokensParser(BundleBuilder builder, Locale locale, SupportedLocales supportedLocales) {
             this.builder = builder;
             this.locale = locale;
@@ -220,12 +219,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
         }
 
         private BundleSectionBuilder getDefaultSectionBuilder() {
-            if (defaultSection != null) {
-                return defaultSection;
-            } else {
-                defaultSection = BundleSectionBuilder.create("default");
-                return defaultSection;
-            }
+            return builder.getDefaultSectionBuilder();
         }
 
         private PropertiesParsingException createParsingException(Token token) {
@@ -282,9 +276,6 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
 
             @Override
             public void close() {
-                if (defaultSection != null) {
-                    builder.section(defaultSection.build());
-                }
             }
         }
 

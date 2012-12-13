@@ -18,6 +18,8 @@ public class BundleBuilder extends Builder<Bundle> {
 	private final List<String> comments = new ArrayList<String>();
 	private final List<BundleSection> sections = new ArrayList<BundleSection>();
 
+    private BundleSectionBuilder defaultSectionBuilder;
+
 	private BundleBuilder(String name) {
 		this.name = name;
 	}
@@ -34,7 +36,16 @@ public class BundleBuilder extends Builder<Bundle> {
 
 	@Override
 	public Bundle build() {
+        if (defaultSectionBuilder != null) {
+            sections.add(0, defaultSectionBuilder.build());
+        }
 		return new Bundle(name, ImmutableList.copyOf(comments), ImmutableList.copyOf(sections));
 	}
 
+    public BundleSectionBuilder getDefaultSectionBuilder() {
+        if (defaultSectionBuilder == null) {
+            defaultSectionBuilder = BundleSectionBuilder.create("default");
+        }
+        return defaultSectionBuilder;
+    }
 }
