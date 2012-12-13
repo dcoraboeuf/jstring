@@ -2,9 +2,7 @@ package net.sf.jstring.io.properties;
 
 public final class Blank extends AbstractToken {
 
-    public static final Blank INSTANCE = new Blank();
-
-    private Blank() {
+    public Blank(int lineno, String line) {
+        super(lineno, line);
     }
-
 }

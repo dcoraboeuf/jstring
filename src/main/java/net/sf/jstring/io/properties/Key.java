@@ -8,18 +8,18 @@ public class Key extends AbstractToken {
     private final String name;
     private final List<Value> values;
 
-    public Key(String name, String text) {
-        this(name, Collections.<Value>singletonList(new Value(text)), false);
+    public Key(int lineno, String line, String name, String text) {
+        this(lineno, line, name, Collections.<Value>singletonList(new Value(lineno, line, text)), false);
     }
 
-    private Key(String name, List<Value> values, boolean expectValues) {
-        super(expectValues);
+    private Key(int lineno, String line, String name, List<Value> values, boolean expectValues) {
+        super(lineno, line, expectValues);
         this.name = name;
         this.values = values;
     }
 
-    public Key(String name, String text, boolean expectValues) {
-        this(name, Collections.<Value>singletonList(new Value(text, expectValues)), expectValues);
+    public Key(int lineno, String line, String name, String text, boolean expectValues) {
+        this(lineno, line, name, Collections.<Value>singletonList(new Value(lineno, line, text, expectValues)), expectValues);
     }
 
     public List<Value> getValues() {

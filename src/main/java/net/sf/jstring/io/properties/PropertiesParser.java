@@ -6,16 +6,15 @@ import net.sf.jstring.io.AbstractParser;
 import net.sf.jstring.io.CannotOpenException;
 import net.sf.jstring.io.CannotParseException;
 import net.sf.jstring.model.Bundle;
-import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
+import java.util.*;
 import java.util.regex.Pattern;
 
 import static java.lang.String.format;
@@ -51,25 +50,32 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
             URL localeURL = getLocaleURL(url, locale, supportedLocales.getDefaultLocale());
             logger.debug("[properties] Getting {} URL for locale {}", localeURL, locale);
             // Parses the URL as tokens
-            List<Token> tokens;
-            try {
-                InputStream in = localeURL.openStream();
-                if (in != null) {
-                        try {
-                            tokens = loadTokens(in);
-                        } finally {
-                            in.close();
-                        }
-                } else {
-                    throw new CannotOpenException(localeURL);
-                }
-            } catch (IOException ex) {
-                throw new CannotParseException(localeURL, ex);
-            }
+            List<Token> tokens = readTokens(localeURL);
+            // Parses the token for this language
+            parseTokens (tokens, builder, locale, supportedLocales);
         }
 
         // Bundle
         return builder.build();
+    }
+
+    private List<Token> readTokens(URL localeURL) {
+        List<Token> tokens;
+        try {
+            InputStream in = localeURL.openStream();
+            if (in != null) {
+                    try {
+                        tokens = loadTokens(in);
+                    } finally {
+                        in.close();
+                    }
+            } else {
+                throw new CannotOpenException(localeURL);
+            }
+        } catch (IOException ex) {
+            throw new CannotParseException(localeURL, ex);
+        }
+        return tokens;
     }
 
     private URL getBundleURL(URL url, Locale defaultLocale) {
@@ -112,7 +118,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
         try {
             List<Token> tokens = new ArrayList<Token>();
             String line;
-            Token previousToken = Blank.INSTANCE;
+            Token previousToken = new Blank(0, "");
             int lineno = 0;
             while ((line = reader.readLine()) != null) {
                 Token token = parseToken (previousToken, line, lineno++);
@@ -129,48 +135,120 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
         String value = trim(line);
         if (StringUtils.isEmpty(value)) {
             // Blank line
-            return Blank.INSTANCE;
+            return new Blank(lineno, line);
         } else if (startsWith(value, COMMENT_PREFIX)) {
             String comment = trim(substring(value, 1));
             // Escaped comment for continued value
             if (previousToken.expectValues()) {
                 if (startsWith(comment, COMMENT_PREFIX)) {
                     // Escaped comment
-                    return newValue(comment);
+                    return newValue(lineno, line, comment);
                 } else if (endsWith(comment, VALUE_CONTINUATOR)) {
                     // This comment allows the values to go on
-                    return new Comment (comment, true);
+                    return new Comment (lineno, line, comment, true);
                 } else {
                     // This comment ends the values
-                    return new Comment (comment);
+                    return new Comment (lineno, line, comment);
                 }
             } else {
-                return new Comment (comment);
+                return new Comment (lineno, line, comment);
             }
         } else if (startsWith(value, "[") && endsWith(value, "]")) {
             String name = substring(value, 0, -1);
-            return new Section (name);
+            return new Section (lineno, line, name);
         } else if (contains(value, KEY_VALUE_SEPARATOR)) {
             String key = trim(substringBefore(value, KEY_VALUE_SEPARATOR));
             String text = trim(substringAfter(value, KEY_VALUE_SEPARATOR));
             if (endsWith(text, VALUE_CONTINUATOR)) {
-                return new Key (key, substring(text, 0, -1), true);
+                return new Key (lineno, line, key, substring(text, 0, -1), true);
             } else {
-                return new Key (key, text);
+                return new Key (lineno, line, key, text);
             }
         } else if (previousToken.expectValues()) {
-            return newValue(value);
+            return newValue(lineno, line, value);
         } else {
             // Just a value - outside of any key definition
             throw new PropertiesParsingException (lineno, line, "Cannot parse standalone value");
         }
     }
 
-    private Token newValue(String value) {
+    private Token newValue(int lineno, String line, String value) {
         if (endsWith(value, VALUE_CONTINUATOR)) {
-            return new Value(substring(value, 0, -1), true);
+            return new Value(lineno, line, substring(value, 0, -1), true);
         } else {
-            return new Value (value);
+            return new Value (lineno, line, value);
         }
     }
+
+    private void parseTokens(List<Token> tokens, BundleBuilder builder, Locale locale, SupportedLocales supportedLocales) {
+        // Initializes the parser
+        TokensParser parser = new TokensParser (builder, locale, supportedLocales);
+        // Loops through all the tokens
+        for (Token token : tokens) {
+            parser.parse(token);
+        }
+    }
+
+    private static class TokensParser {
+        private final BundleBuilder builder;
+        private final Locale locale;
+        private final SupportedLocales supportedLocales;
+        private final Stack<TokenParser> parserStack;
+
+        public TokensParser(BundleBuilder builder, Locale locale, SupportedLocales supportedLocales) {
+            this.builder = builder;
+            this.locale = locale;
+            this.supportedLocales = supportedLocales;
+            parserStack = new Stack<TokenParser>();
+            parserStack.push(new BundleParser());
+        }
+
+        private PropertiesParsingException createParsingException(Token token) {
+            return new PropertiesParsingException(token.getLineno(), token.getLine(), format("Unexpected token %s", token.getClass().getSimpleName()));
+        }
+
+        public void parse(Token token) {
+            TokenParser currentParser = parserStack.peek();
+            TokenParser parser = currentParser.parse(token);
+            if (parser == null) {
+                parserStack.pop();
+            } else if (parser != currentParser) {
+                parserStack.push(parser);
+            }
+        }
+
+        private interface TokenParser {
+
+            TokenParser parse(Token token);
+        }
+
+        private abstract class AbstractTokenParser implements TokenParser {
+
+        }
+
+        private class BundleParser extends AbstractTokenParser {
+
+            @Override
+            public TokenParser parse(Token token) {
+                if (token instanceof Comment) {
+                    builder.comment(((Comment) token).getComment());
+                    return this;
+                } else if (token instanceof Key) {
+                    return new KeyParser();
+                } else {
+                    throw createParsingException (token);
+                }
+            }
+        }
+
+        private class KeyParser extends AbstractTokenParser {
+
+            @Override
+            public TokenParser parse(Token token) {
+                // FIXME Implement net.sf.jstring.io.properties.PropertiesParser.TokensParser.KeyParser.parse
+                return null;
+            }
+        }
+    }
+
 }

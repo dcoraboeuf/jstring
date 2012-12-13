@@ -4,4 +4,7 @@ public interface Token {
 
     boolean expectValues ();
 
+    int getLineno();
+
+    String getLine();
 }
