@@ -1,6 +1,7 @@
 package net.sf.jstring.io.properties;
 
 import net.sf.jstring.SupportedLocales;
+import net.sf.jstring.builder.BundleBuilder;
 import net.sf.jstring.io.AbstractParser;
 import net.sf.jstring.io.CannotOpenException;
 import net.sf.jstring.io.CannotParseException;
@@ -40,20 +41,22 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
 
     @Override
     public Bundle parse(SupportedLocales supportedLocales, URL url) {
-        // FIXME Parse one file per language
         logger.debug("[properties] Getting bundle for {}", url);
+        // Bundle builder
+        BundleBuilder builder = BundleBuilder.create(getBundleName(getBundleURL(url, supportedLocales.getDefaultLocale())));
         // Gets the list of languages
         Collection<Locale> locales = supportedLocales.getSupportedLocales();
         for (Locale locale : locales) {
             // Gets the URL for this locale
             URL localeURL = getLocaleURL(url, locale, supportedLocales.getDefaultLocale());
             logger.debug("[properties] Getting {} URL for locale {}", localeURL, locale);
-            // Tries to open the URL
+            // Parses the URL as tokens
+            List<Token> tokens;
             try {
                 InputStream in = localeURL.openStream();
                 if (in != null) {
                         try {
-                            List<Token> tokens = loadTokens(in);
+                            tokens = loadTokens(in);
                         } finally {
                             in.close();
                         }
@@ -65,8 +68,22 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
             }
         }
 
-        // FIXME Bundle
-        return null;
+        // Bundle
+        return builder.build();
+    }
+
+    private URL getBundleURL(URL url, Locale defaultLocale) {
+        final String file = url.getFile();
+        String name = file.replaceFirst(format("_%s\\.properties", defaultLocale), ".properties");
+        return getURLWithNewFile(url, name);
+    }
+
+    private URL getURLWithNewFile(URL url, String name) {
+        try {
+            return new URL(url, name);
+        } catch (MalformedURLException e) {
+            throw new CannotOpenException(url);
+        }
     }
 
     protected URL getLocaleURL(URL url, Locale locale, Locale defaultLocale) {
@@ -87,11 +104,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
                 name = file.replaceFirst("\\.properties$", format("_%s.properties", locale));
             }
         }
-        try {
-            return new URL(url, name);
-        } catch (MalformedURLException e) {
-            throw new CannotOpenException(url);
-        }
+        return getURLWithNewFile(url, name);
     }
 
     private List<Token> loadTokens(InputStream in) throws IOException {
