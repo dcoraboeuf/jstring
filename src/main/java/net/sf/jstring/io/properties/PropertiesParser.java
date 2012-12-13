@@ -5,16 +5,19 @@ import net.sf.jstring.io.AbstractParser;
 import net.sf.jstring.io.CannotOpenException;
 import net.sf.jstring.io.CannotParseException;
 import net.sf.jstring.model.Bundle;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.*;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
+import java.util.regex.Pattern;
 
+import static java.lang.String.format;
 import static org.apache.commons.lang3.StringUtils.*;
 
 public class PropertiesParser extends AbstractParser<PropertiesParser> {
@@ -37,34 +40,75 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
 
     @Override
     public Bundle parse(SupportedLocales supportedLocales, URL url) {
-        List<Token> tokens = loadTokens(url);
+        // FIXME Parse one file per language
+        logger.debug("[properties] Getting bundle for {}", url);
+        // Gets the list of languages
+        Collection<Locale> locales = supportedLocales.getSupportedLocales();
+        for (Locale locale : locales) {
+            // Gets the URL for this locale
+            URL localeURL = getLocaleURL(url, locale, supportedLocales.getDefaultLocale());
+            logger.debug("[properties] Getting {} URL for locale {}", localeURL, locale);
+            // Tries to open the URL
+            try {
+                InputStream in = localeURL.openStream();
+                if (in != null) {
+                        try {
+                            List<Token> tokens = loadTokens(in);
+                        } finally {
+                            in.close();
+                        }
+                } else {
+                    throw new CannotOpenException(localeURL);
+                }
+            } catch (IOException ex) {
+                throw new CannotParseException(localeURL, ex);
+            }
+        }
+
+        // FIXME Bundle
         return null;
     }
 
-    private List<Token> loadTokens(URL url) {
-        try {
-            InputStream in = url.openStream();
-            if (in == null) {
-                throw new CannotOpenException(url);
+    protected URL getLocaleURL(URL url, Locale locale, Locale defaultLocale) {
+        final String file = url.getFile();
+        String name;
+        if (Pattern.matches(format(".*_%s\\.properties$", defaultLocale), file)) {
+            // Suffix mode - uses the target locale only for the non-default locale
+            if (defaultLocale.equals(locale)) {
+                name = file;
             } else {
-                BufferedReader reader = new BufferedReader(new InputStreamReader(in, ENCODING));
-                try {
-                    List<Token> tokens = new ArrayList<Token>();
-                    String line;
-                    Token previousToken = Blank.INSTANCE;
-                    int lineno = 0;
-                    while ((line = reader.readLine()) != null) {
-                        Token token = parseToken (previousToken, line, lineno++);
-                        tokens.add(token);
-                        previousToken = token;
-                    }
-                    return tokens;
-                } finally {
-                    reader.close();
-                }
+                name = file.replaceFirst(format("_%s\\.properties$", defaultLocale), format("_%s.properties", locale));
             }
-        } catch (IOException ex) {
-            throw new CannotParseException(url, ex);
+        } else {
+            // No suffix mode - uses the target locale directly, only for the non-default locale
+            if (defaultLocale.equals(locale)) {
+                name = file;
+            } else {
+                name = file.replaceFirst("\\.properties$", format("_%s.properties", locale));
+            }
+        }
+        try {
+            return new URL(url, name);
+        } catch (MalformedURLException e) {
+            throw new CannotOpenException(url);
+        }
+    }
+
+    private List<Token> loadTokens(InputStream in) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(in, ENCODING));
+        try {
+            List<Token> tokens = new ArrayList<Token>();
+            String line;
+            Token previousToken = Blank.INSTANCE;
+            int lineno = 0;
+            while ((line = reader.readLine()) != null) {
+                Token token = parseToken (previousToken, line, lineno++);
+                tokens.add(token);
+                previousToken = token;
+            }
+            return tokens;
+        } finally {
+            reader.close();
         }
     }
 
