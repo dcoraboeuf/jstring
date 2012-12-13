@@ -48,4 +48,14 @@ public class BundleBuilder extends Builder<Bundle> {
         }
         return defaultSectionBuilder;
     }
+
+    public void merge(BundleBuilder builder) {
+        merge(builder.build());
+    }
+
+    protected void merge(Bundle bundle) {
+        // TODO Comments
+        // TODO Top keys
+        // TODO Sections
+    }
 }

@@ -48,11 +48,14 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
         logger.debug("[properties] Getting bundle for {}", url);
         // Gets the list of languages
         Collection<Locale> locales = supportedLocales.getSupportedLocales();
-        // Bundle builder
+        // Bundle name
         String bundleName = getBundleName(getBundleURL(url, supportedLocales.getDefaultLocale()));
-        BundleBuilder builder = BundleBuilder.create(bundleName);
+        // Overall bundle
+        BundleBuilder general = BundleBuilder.create(bundleName);
         // For all locales
         for (Locale locale : locales) {
+            // Bundle builder
+            BundleBuilder builder = BundleBuilder.create(bundleName);
             // Gets the URL for this locale
             URL localeURL = getLocaleURL(url, locale, supportedLocales.getDefaultLocale());
             logger.debug("[properties] Getting {} URL for locale {}", localeURL, locale);
@@ -60,10 +63,12 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
             List<Token> tokens = readTokens(localeURL);
             // Parses the token for this language
             parseTokens(tokens, builder, locale, supportedLocales);
+            // Merge
+            general.merge(builder);
         }
 
         // Bundle
-        return builder.build();
+        return general.build();
     }
 
     private List<Token> readTokens(URL localeURL) {
@@ -264,10 +269,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
             @Override
             public void parse(Token token) {
                 if (token instanceof Comment) {
-                    if (locale.equals(supportedLocales.getDefaultLocale())) {
-                        // Comments are accepted only for the default locale
-                        builder.comment(((Comment) token).getComment());
-                    }
+                    builder.comment(((Comment) token).getComment());
                 } else if (token instanceof Blank) {
                     push(new TopBlankParser());
                 } else if (token instanceof Key) {
