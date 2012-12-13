@@ -264,7 +264,10 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
             @Override
             public void parse(Token token) {
                 if (token instanceof Comment) {
-                    builder.comment(((Comment) token).getComment());
+                    if (locale.equals(supportedLocales.getDefaultLocale())) {
+                        // Comments are accepted only for the default locale
+                        builder.comment(((Comment) token).getComment());
+                    }
                 } else if (token instanceof Blank) {
                     push(new TopBlankParser());
                 } else if (token instanceof Key) {
