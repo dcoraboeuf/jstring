@@ -9,8 +9,6 @@ import net.sf.jstring.io.AbstractParser;
 import net.sf.jstring.io.CannotOpenException;
 import net.sf.jstring.io.CannotParseException;
 import net.sf.jstring.model.Bundle;
-import net.sf.jstring.model.BundleKey;
-import net.sf.jstring.model.BundleSection;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.w3c.dom.Document;
@@ -107,20 +105,15 @@ public class XMLParser extends AbstractParser<XMLParser> {
                 }
             );
         // Top keys
-        final BundleSectionBuilder defaultSection = BundleSectionBuilder.create("default");
         each(
                 dom.getDocumentElement(), "key",
                 new ElementIterator() {
                     @Override
                     public void onElement(int index, Element keyNode) {
-                        defaultSection.key(parseKey((Element) keyNode, supportedLocales));
+                        builder.getDefaultSectionBuilder().key(parseKey((Element) keyNode, supportedLocales));
                     }
                 }
         );
-        BundleSection section = defaultSection.build();
-        if (!section.getKeys().isEmpty()) {
-            builder.section(section);
-        }
         // Sections
         each(
                 dom.getDocumentElement(), "section",
@@ -158,10 +151,10 @@ public class XMLParser extends AbstractParser<XMLParser> {
                 }
         );
         // OK
-        builder.section(section.build());
+        builder.section(section);
     }
 
-    private BundleKey parseKey(Element keyNode, final SupportedLocales supportedLocales) {
+    private BundleKeyBuilder parseKey(Element keyNode, final SupportedLocales supportedLocales) {
         String name = keyNode.getAttribute("name");
         final BundleKeyBuilder key = BundleKeyBuilder.create(name);
         // Comments
@@ -185,7 +178,7 @@ public class XMLParser extends AbstractParser<XMLParser> {
                 }
         );
         // OK
-        return key.build();
+        return key;
     }
 
     private void parseValue(BundleKeyBuilder key, Element valueNode, SupportedLocales supportedLocales) {
@@ -215,7 +208,7 @@ public class XMLParser extends AbstractParser<XMLParser> {
         }
         // OK
         for (Locale language: languages) {
-            key.value(language, valueBuilder.build());
+            key.value(language, valueBuilder);
         }
     }
 

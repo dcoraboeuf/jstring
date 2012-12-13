@@ -9,7 +9,6 @@ import net.sf.jstring.io.AbstractParser;
 import net.sf.jstring.io.CannotOpenException;
 import net.sf.jstring.io.CannotParseException;
 import net.sf.jstring.model.Bundle;
-import net.sf.jstring.model.BundleValue;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 
@@ -121,7 +120,7 @@ public class LSParser extends AbstractParser<LSParser> {
 			
 			@Override
 			public void close() {
-				bundleBuilder.section(sectionBuilder.build());
+				bundleBuilder.section(sectionBuilder);
 			}
 			
 			@Override
@@ -178,7 +177,7 @@ public class LSParser extends AbstractParser<LSParser> {
 								value = StringEscapeUtils.unescapeJava(value);
 								// Adds the value
                                 for (Locale language: languages) {
-								    keyBuilder.value(language, BundleValue.value(value));
+								    keyBuilder.value(language, BundleValueBuilder.create().value(value));
                                 }
 							}
 						} else {
@@ -191,7 +190,7 @@ public class LSParser extends AbstractParser<LSParser> {
 			
 			@Override
 			public void close() {
-				sectionBuilder.key(keyBuilder.build());
+				sectionBuilder.key(keyBuilder);
 			}
 			
 			@Override
@@ -232,7 +231,7 @@ public class LSParser extends AbstractParser<LSParser> {
 			
 			@Override
 			public void close() {
-				keyBuilder.value(language, valueBuilder.build());
+				keyBuilder.value(language, valueBuilder);
 			}
 			
 			@Override

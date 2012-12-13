@@ -4,6 +4,7 @@ import net.sf.jstring.SupportedLocales;
 import net.sf.jstring.builder.BundleBuilder;
 import net.sf.jstring.builder.BundleKeyBuilder;
 import net.sf.jstring.builder.BundleSectionBuilder;
+import net.sf.jstring.builder.BundleValueBuilder;
 import net.sf.jstring.io.AbstractParser;
 import net.sf.jstring.io.CannotOpenException;
 import net.sf.jstring.io.CannotParseException;
@@ -305,7 +306,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
 
             public TopKeyParser(Key key) {
                 keyBuilder = BundleKeyBuilder.create(key.getName());
-                keyBuilder.value(locale, BundleValue.value(readValue(key.getValue())));
+                keyBuilder.value(locale, BundleValueBuilder.create().value(readValue(key.getValue())));
             }
 
             @Override
@@ -321,7 +322,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
 
             @Override
             public void close() {
-                getDefaultSectionBuilder().key(keyBuilder.build());
+                getDefaultSectionBuilder().key(keyBuilder);
             }
         }
     }
