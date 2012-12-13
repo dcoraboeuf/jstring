@@ -6,24 +6,20 @@ import java.util.List;
 public class Key extends AbstractToken {
 
     private final String name;
-    private final List<Value> values;
+    private final String value;
 
     public Key(int lineno, String line, String name, String text) {
-        this(lineno, line, name, Collections.<Value>singletonList(new Value(lineno, line, text)), false);
+        this(lineno, line, name, text, false);
     }
 
-    private Key(int lineno, String line, String name, List<Value> values, boolean expectValues) {
+    public Key(int lineno, String line, String name, String value, boolean expectValues) {
         super(lineno, line, expectValues);
         this.name = name;
-        this.values = values;
+        this.value = value;
     }
 
-    public Key(int lineno, String line, String name, String text, boolean expectValues) {
-        this(lineno, line, name, Collections.<Value>singletonList(new Value(lineno, line, text, expectValues)), expectValues);
-    }
-
-    public List<Value> getValues() {
-        return values;
+    public String getValue() {
+        return value;
     }
 
     public String getName() {

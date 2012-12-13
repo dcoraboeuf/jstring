@@ -2,10 +2,14 @@ package net.sf.jstring.io.properties;
 
 import net.sf.jstring.SupportedLocales;
 import net.sf.jstring.builder.BundleBuilder;
+import net.sf.jstring.builder.BundleKeyBuilder;
+import net.sf.jstring.builder.BundleSectionBuilder;
 import net.sf.jstring.io.AbstractParser;
 import net.sf.jstring.io.CannotOpenException;
 import net.sf.jstring.io.CannotParseException;
 import net.sf.jstring.model.Bundle;
+import net.sf.jstring.model.BundleValue;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 
 import java.io.BufferedReader;
@@ -41,10 +45,12 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
     @Override
     public Bundle parse(SupportedLocales supportedLocales, URL url) {
         logger.debug("[properties] Getting bundle for {}", url);
-        // Bundle builder
-        BundleBuilder builder = BundleBuilder.create(getBundleName(getBundleURL(url, supportedLocales.getDefaultLocale())));
         // Gets the list of languages
         Collection<Locale> locales = supportedLocales.getSupportedLocales();
+        // Bundle builder
+        String bundleName = getBundleName(getBundleURL(url, supportedLocales.getDefaultLocale()));
+        BundleBuilder builder = BundleBuilder.create(bundleName);
+        // For all locales
         for (Locale locale : locales) {
             // Gets the URL for this locale
             URL localeURL = getLocaleURL(url, locale, supportedLocales.getDefaultLocale());
@@ -187,6 +193,8 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
         for (Token token : tokens) {
             parser.parse(token);
         }
+        // OK
+        parser.close();
     }
 
     private static class TokensParser {
@@ -194,6 +202,8 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
         private final Locale locale;
         private final SupportedLocales supportedLocales;
         private final Stack<TokenParser> parserStack;
+
+        private BundleSectionBuilder defaultSection;
 
         public TokensParser(BundleBuilder builder, Locale locale, SupportedLocales supportedLocales) {
             this.builder = builder;
@@ -203,23 +213,52 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
             parserStack.push(new BundleParser());
         }
 
+        public void close() {
+            while (!parserStack.isEmpty()) {
+                parserStack.pop().close();
+            }
+        }
+
+        private BundleSectionBuilder getDefaultSectionBuilder() {
+            if (defaultSection != null) {
+                return defaultSection;
+            } else {
+                defaultSection = BundleSectionBuilder.create("default");
+                return defaultSection;
+            }
+        }
+
         private PropertiesParsingException createParsingException(Token token) {
             return new PropertiesParsingException(token.getLineno(), token.getLine(), format("Unexpected token %s", token.getClass().getSimpleName()));
         }
 
         public void parse(Token token) {
             TokenParser currentParser = parserStack.peek();
-            TokenParser parser = currentParser.parse(token);
-            if (parser == null) {
-                parserStack.pop();
-            } else if (parser != currentParser) {
-                parserStack.push(parser);
+            currentParser.parse(token);
+        }
+
+        private TokenParser push (TokenParser tokenParser) {
+            parserStack.push(tokenParser);
+            return tokenParser;
+        }
+
+        private TokenParser cleanAndPush (Class<? extends TokenParser> topTokenParserType, TokenParser tokenParser) {
+            while (!topTokenParserType.isInstance(parserStack.peek())) {
+                TokenParser parser = parserStack.pop();
+                parser.close();
             }
+            return push(tokenParser);
+        }
+
+        private String readValue(String value) {
+            return StringEscapeUtils.unescapeJava(value);
         }
 
         private interface TokenParser {
 
-            TokenParser parse(Token token);
+            void parse(Token token);
+
+            void close();
         }
 
         private abstract class AbstractTokenParser implements TokenParser {
@@ -229,24 +268,64 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
         private class BundleParser extends AbstractTokenParser {
 
             @Override
-            public TokenParser parse(Token token) {
+            public void parse(Token token) {
                 if (token instanceof Comment) {
                     builder.comment(((Comment) token).getComment());
-                    return this;
+                } else if (token instanceof Blank) {
+                    push(new TopBlankParser());
                 } else if (token instanceof Key) {
-                    return new KeyParser();
+                    push(new TopKeyParser((Key) token));
                 } else {
                     throw createParsingException (token);
                 }
             }
-        }
-
-        private class KeyParser extends AbstractTokenParser {
 
             @Override
-            public TokenParser parse(Token token) {
-                // FIXME Implement net.sf.jstring.io.properties.PropertiesParser.TokensParser.KeyParser.parse
-                return null;
+            public void close() {
+                if (defaultSection != null) {
+                    builder.section(defaultSection.build());
+                }
+            }
+        }
+
+        private class TopBlankParser extends AbstractTokenParser {
+
+            @Override
+            public void parse(Token token) {
+            }
+
+            @Override
+            public void close() {
+            }
+        }
+
+        private abstract class AbstractKeyParser extends AbstractTokenParser {
+
+        }
+
+        private class TopKeyParser extends AbstractKeyParser {
+
+            private final BundleKeyBuilder keyBuilder;
+
+            public TopKeyParser(Key key) {
+                keyBuilder = BundleKeyBuilder.create(key.getName());
+                keyBuilder.value(locale, BundleValue.value(readValue(key.getValue())));
+            }
+
+            @Override
+            public void parse(Token token) {
+                if (token instanceof Key) {
+                    cleanAndPush(BundleParser.class, new TopKeyParser((Key) token));
+                } else if (token instanceof Blank) {
+                    cleanAndPush(BundleParser.class, new TopBlankParser());
+                } else {
+                    throw createParsingException(token);
+                }
+            }
+
+            @Override
+            public void close() {
+                getDefaultSectionBuilder().key(keyBuilder.build());
             }
         }
     }
