@@ -2,11 +2,12 @@ package net.sf.jstring.builder;
 
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
+import com.google.common.collect.Iterables;
+import net.sf.jstring.model.BundleKey;
 import net.sf.jstring.model.BundleSection;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 public class BundleSectionBuilder extends AbstractBuilderCommented<BundleSection, BundleSectionBuilder> {
 
@@ -22,7 +23,7 @@ public class BundleSectionBuilder extends AbstractBuilderCommented<BundleSection
 	}
 
 	private final String name;
-	private final List<BundleKeyBuilder> keys = new ArrayList<BundleKeyBuilder>();
+	private final Map<String,BundleKeyBuilder> keys = new LinkedHashMap<String, BundleKeyBuilder>();
 
 	private BundleSectionBuilder(String name) {
 		this.name = name;
@@ -33,7 +34,7 @@ public class BundleSectionBuilder extends AbstractBuilderCommented<BundleSection
 	}
 	
 	public BundleSectionBuilder key (BundleKeyBuilder key) {
-		keys.add(key);
+		keys.put(key.getName(), key);
 		return this;
 	}
 
@@ -43,15 +44,29 @@ public class BundleSectionBuilder extends AbstractBuilderCommented<BundleSection
                 name,
                 ImmutableList.copyOf(getComments()),
                 ImmutableList.copyOf(
-                    Lists.transform(keys, BundleKeyBuilder.buildFn)
+                    Iterables.transform(keys.values(), BundleKeyBuilder.buildFn)
                 ));
 	}
 
     @Override
 	public void merge(BundleSection section) {
         super.merge(section);
-		// FIXME Implement BundleSectionBuilder.merge
-		
+		// Keys
+		mergeKeys(section.getKeys());
 	}
+
+    private void mergeKeys(ImmutableList<BundleKey> sourceKeys) {
+        for (BundleKey sourceKey : sourceKeys) {
+            String name = sourceKey.getName();
+            BundleKeyBuilder key = keys.get(name);
+            if (key != null) {
+                key.merge(sourceKey);
+            } else {
+                BundleKeyBuilder keyBuilder = BundleKeyBuilder.create(name);
+                keyBuilder.merge(sourceKey);
+                key(keyBuilder);
+            }
+        }
+    }
 
 }
