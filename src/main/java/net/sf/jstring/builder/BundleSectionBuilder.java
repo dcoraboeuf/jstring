@@ -69,4 +69,11 @@ public class BundleSectionBuilder extends AbstractBuilderCommented<BundleSection
         }
     }
 
+    @Override
+    public String toString() {
+        return "BundleSectionBuilder{" +
+                "name='" + name + '\'' +
+                ", keys=" + keys +
+                '}';
+    }
 }

@@ -60,14 +60,22 @@ public class BundleKeyBuilder extends AbstractBuilderCommented<BundleKey, Bundle
         for (Map.Entry<Locale,BundleValue> sourceEntry: sourceValues.entrySet()) {
             Locale locale = sourceEntry.getKey();
             BundleValue sourceBundleValue = sourceEntry.getValue();
-            BundleValueBuilder value = values.get(locale);
-            if (value != null) {
-                value.merge(sourceBundleValue);
+            BundleValueBuilder valueBuilder = values.get(locale);
+            if (valueBuilder != null) {
+                valueBuilder.merge(sourceBundleValue);
             } else {
-                BundleValueBuilder valueBuilder = BundleValueBuilder.create();
+                valueBuilder = BundleValueBuilder.create();
                 valueBuilder.merge(sourceBundleValue);
                 value(locale, valueBuilder);
             }
         }
+    }
+
+    @Override
+    public String toString() {
+        return "BundleKeyBuilder{" +
+                "name='" + name + '\'' +
+                ", values=" + values +
+                '}';
     }
 }

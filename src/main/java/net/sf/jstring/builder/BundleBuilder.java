@@ -73,4 +73,12 @@ public class BundleBuilder extends AbstractBuilderCommented<Bundle, BundleBuilde
 			}
 		}
 	}
+
+    @Override
+    public String toString() {
+        return "BundleBuilder{" +
+                "name='" + name + '\'' +
+                ", sections=" + sections +
+                '}';
+    }
 }
