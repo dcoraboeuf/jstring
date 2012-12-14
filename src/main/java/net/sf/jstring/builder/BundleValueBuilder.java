@@ -1,14 +1,10 @@
 package net.sf.jstring.builder;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import com.google.common.base.Function;
+import com.google.common.collect.ImmutableList;
 import net.sf.jstring.model.BundleValue;
 
-import com.google.common.collect.ImmutableList;
-
-public class BundleValueBuilder extends Builder<BundleValue> {
+public class BundleValueBuilder extends AbstractBuilderCommented<BundleValue, BundleValueBuilder> {
 
     public static final Function<? super BundleValueBuilder, BundleValue> buildFn = new Function<BundleValueBuilder, BundleValue>() {
         @Override
@@ -26,14 +22,8 @@ public class BundleValueBuilder extends Builder<BundleValue> {
     }
 
 	private final StringBuilder value = new StringBuilder();
-	private final List<String> comments = new ArrayList<String>();
 
 	private BundleValueBuilder() {
-	}
-
-	public BundleValueBuilder comment(String comment) {
-		comments.add(comment);
-		return this;
 	}
 	
 	public BundleValueBuilder value (String text) {
@@ -46,7 +36,9 @@ public class BundleValueBuilder extends Builder<BundleValue> {
 
 	@Override
 	public BundleValue build() {
-		return new BundleValue(ImmutableList.copyOf(comments), value.toString());
+		return new BundleValue(
+                ImmutableList.copyOf(getComments()),
+                value.toString());
 	}
 
 }

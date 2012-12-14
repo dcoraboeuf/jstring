@@ -8,7 +8,7 @@ import net.sf.jstring.model.BundleKey;
 
 import java.util.*;
 
-public class BundleKeyBuilder extends Builder<BundleKey> {
+public class BundleKeyBuilder extends AbstractBuilderCommented<BundleKey, BundleKeyBuilder> {
 
     public static final Function<? super BundleKeyBuilder, BundleKey> buildFn = new Function<BundleKeyBuilder, BundleKey>() {
         @Override
@@ -22,7 +22,6 @@ public class BundleKeyBuilder extends Builder<BundleKey> {
 	}
 
 	private final String name;
-	private final List<String> comments = new ArrayList<String>();
 	private final Map<Locale, BundleValueBuilder> values = new LinkedHashMap<Locale, BundleValueBuilder>();
 
 	private BundleKeyBuilder(String name) {
@@ -33,11 +32,6 @@ public class BundleKeyBuilder extends Builder<BundleKey> {
 		return name;
 	}
 
-	public BundleKeyBuilder comment(String comment) {
-		comments.add(comment);
-		return this;
-	}
-
 	public BundleKeyBuilder value(Locale language, BundleValueBuilder value) {
 		values.put(language, value);
 		return this;
@@ -45,8 +39,11 @@ public class BundleKeyBuilder extends Builder<BundleKey> {
 
 	@Override
 	public BundleKey build() {
-		return new BundleKey(name, ImmutableList.copyOf(comments), ImmutableMap.copyOf(
-                Maps.transformValues(
+		return new BundleKey(
+                name,
+                ImmutableList.copyOf(getComments()),
+                ImmutableMap.copyOf(
+                    Maps.transformValues(
                         values,
                         BundleValueBuilder.buildFn
                 )
