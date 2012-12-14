@@ -250,12 +250,17 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
         }
 
         private TokenParser cleanAndPush (Class<? extends TokenParser> topTokenParserType, TokenParser tokenParser) {
+            cleanUntil(topTokenParserType);
+            return push(tokenParser);
+        }
+
+        private TokenParser cleanUntil(Class<? extends TokenParser> topTokenParserType) {
             while (!topTokenParserType.isInstance(parserStack.peek())) {
                 TokenParser parser = parserStack.pop();
                 trace("[properties]   - {}", parser.getClass().getSimpleName());
                 parser.close();
             }
-            return push(tokenParser);
+            return parserStack.peek();
         }
 
         private String readValue(String value) {
@@ -312,6 +317,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
         private class SectionParser extends AbstractTokenParser {
 
             private final BundleSectionBuilder sectionBuilder;
+            private final List<String> comments = new ArrayList<String>();
 
             public SectionParser(Section token, Collection<String> comments) {
                 sectionBuilder = BundleSectionBuilder.create(token.getName());
@@ -322,8 +328,19 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
 
             @Override
             public void parse(Token token) {
-                // FIXME Implement net.sf.jstring.io.properties.PropertiesParser.TokensParser.SectionParser.parse
-
+                if (token instanceof Blank) {
+                    // Does nothing
+                } else if (token instanceof Key) {
+                    push(new SectionKeyParser(sectionBuilder, (Key) token, comments));
+                    comments.clear();
+                } else if (token instanceof Comment) {
+                    comments.add(((Comment) token).getComment());
+                } else if (token instanceof Section) {
+                    cleanAndPush(BundleParser.class, new SectionParser((Section) token, comments));
+                    comments.clear();
+                } else {
+                    throw createParsingException(token);
+                }
             }
 
             @Override
@@ -334,15 +351,47 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
 
         private abstract class AbstractKeyParser extends AbstractTokenParser {
 
+            protected final BundleKeyBuilder keyBuilder;
+
+            protected AbstractKeyParser(Key key, List<String> comments) {
+                keyBuilder = BundleKeyBuilder.create(key.getName());
+                keyBuilder.value(locale, BundleValueBuilder.create().value(readValue(key.getValue())));
+                for (String comment : comments) {
+                    keyBuilder.comment(comment);
+                }
+            }
+        }
+
+        private class SectionKeyParser extends AbstractKeyParser {
+
+            private final BundleSectionBuilder sectionBuilder;
+
+            public SectionKeyParser(BundleSectionBuilder sectionBuilder, Key key, List<String> comments) {
+                super(key, comments);
+                this.sectionBuilder = sectionBuilder;
+            }
+
+            @Override
+            public void parse(Token token) {
+                if (token instanceof Key) {
+                    cleanAndPush(SectionParser.class, new SectionKeyParser(sectionBuilder, (Key) token, Collections.<String>emptyList()));
+                } else if (token instanceof Blank || token instanceof Comment) {
+                    cleanUntil(SectionParser.class).parse(token);
+                } else {
+                    throw createParsingException(token);
+                }
+            }
+
+            @Override
+            public void close() {
+                sectionBuilder.key(keyBuilder);
+            }
         }
 
         private class TopKeyParser extends AbstractKeyParser {
 
-            private final BundleKeyBuilder keyBuilder;
-
             public TopKeyParser(Key key) {
-                keyBuilder = BundleKeyBuilder.create(key.getName());
-                keyBuilder.value(locale, BundleValueBuilder.create().value(readValue(key.getValue())));
+                super(key, Collections.<String>emptyList());
             }
 
             @Override
