@@ -3,6 +3,7 @@ package net.sf.jstring.builder;
 import com.google.common.base.Function;
 import com.google.common.collect.ImmutableList;
 import net.sf.jstring.model.BundleValue;
+import org.apache.commons.lang3.StringUtils;
 
 public class BundleValueBuilder extends AbstractBuilderCommented<BundleValue, BundleValueBuilder> {
 
@@ -41,4 +42,12 @@ public class BundleValueBuilder extends AbstractBuilderCommented<BundleValue, Bu
                 value.toString());
 	}
 
+    @Override
+    public void merge(BundleValue source) {
+        super.merge(source);
+        String sourceValue = source.getValue();
+        if (StringUtils.isNotBlank(sourceValue)) {
+            value.append(sourceValue);
+        }
+    }
 }
