@@ -1,27 +1,5 @@
 package net.sf.jstring.io.properties;
 
-import static java.lang.String.format;
-import static org.apache.commons.lang3.StringUtils.contains;
-import static org.apache.commons.lang3.StringUtils.endsWith;
-import static org.apache.commons.lang3.StringUtils.startsWith;
-import static org.apache.commons.lang3.StringUtils.substring;
-import static org.apache.commons.lang3.StringUtils.substringAfter;
-import static org.apache.commons.lang3.StringUtils.substringBefore;
-import static org.apache.commons.lang3.StringUtils.trim;
-
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.net.MalformedURLException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Locale;
-import java.util.Stack;
-import java.util.regex.Pattern;
-
 import net.sf.jstring.SupportedLocales;
 import net.sf.jstring.builder.BundleBuilder;
 import net.sf.jstring.builder.BundleKeyBuilder;
@@ -31,9 +9,20 @@ import net.sf.jstring.io.AbstractParser;
 import net.sf.jstring.io.CannotOpenException;
 import net.sf.jstring.io.CannotParseException;
 import net.sf.jstring.model.Bundle;
-
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.util.*;
+import java.util.regex.Pattern;
+
+import static java.lang.String.format;
+import static org.apache.commons.lang3.StringUtils.*;
 
 public class PropertiesParser extends AbstractParser<PropertiesParser> {
 
@@ -213,7 +202,14 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
         parser.close();
     }
 
-    private static class TokensParser {
+    private interface TokenParser {
+
+        void parse(Token token);
+
+        void close();
+    }
+
+    private class TokensParser {
         private final BundleBuilder builder;
         private final Locale locale;
         private final SupportedLocales supportedLocales;
@@ -243,17 +239,20 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
 
         public void parse(Token token) {
             TokenParser currentParser = parserStack.peek();
+            trace("[properties] {} ==> {}", token.getClass().getSimpleName(), currentParser.getClass().getSimpleName());
             currentParser.parse(token);
         }
 
         private TokenParser push (TokenParser tokenParser) {
             parserStack.push(tokenParser);
+            trace("[properties]   + {}", tokenParser.getClass().getSimpleName());
             return tokenParser;
         }
 
         private TokenParser cleanAndPush (Class<? extends TokenParser> topTokenParserType, TokenParser tokenParser) {
             while (!topTokenParserType.isInstance(parserStack.peek())) {
                 TokenParser parser = parserStack.pop();
+                trace("[properties]   - {}", parser.getClass().getSimpleName());
                 parser.close();
             }
             return push(tokenParser);
@@ -261,13 +260,6 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
 
         private String readValue(String value) {
             return StringEscapeUtils.unescapeJava(value);
-        }
-
-        private interface TokenParser {
-
-            void parse(Token token);
-
-            void close();
         }
 
         private abstract class AbstractTokenParser implements TokenParser {
