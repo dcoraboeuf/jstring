@@ -23,12 +23,5 @@ public class CoreExceptionTest {
 		assertEquals ("Test exception n°10", ex.getLocalizedMessage(strings, Locale.ENGLISH));
 		assertEquals ("Exception de test n°10", ex.getLocalizedMessage(strings, Locale.FRENCH));
 	}
-	
-	@Test
-	public void standard_exception() {
-		Strings strings = StringsLoader.basic().withLocale(Locale.FRENCH).load();
-		CannotFindResourceException ex = new CannotFindResourceException("/test");
-		assertEquals ("[jstring-01] Cannot find resource at /test", ex.getLocalizedMessage(strings, Locale.ENGLISH));
-	}
 
 }

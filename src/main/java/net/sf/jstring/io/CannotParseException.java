@@ -1,13 +1,13 @@
 package net.sf.jstring.io;
 
-import net.sf.jstring.support.CoreException;
-
 import java.net.URL;
 
-public class CannotParseException extends CoreException {
+import net.sf.jstring.support.JSException;
+
+public class CannotParseException extends JSException {
 
 	public CannotParseException(URL url, Exception ex) {
-		super(ex, url, ex);
+		super(ex, "Cannot parse URL at %s: %s", url, ex);
 	}
 
 }

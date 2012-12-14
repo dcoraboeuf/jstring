@@ -1,9 +1,11 @@
 package net.sf.jstring.io.properties;
 
-import net.sf.jstring.support.CoreException;
+import net.sf.jstring.support.JSException;
 
-public class PropertiesParsingException extends CoreException {
-    public PropertiesParsingException(int lineno, String line, String message) {
-        super(lineno, line, message);
-    }
+public class PropertiesParsingException extends JSException {
+	public PropertiesParsingException(int lineNo, String line, String message) {
+		super(
+				"Error while parsing propertis file at line %d%n\tMessage: %s%n\tLine: %s",
+				lineNo, line, message);
+	}
 }
