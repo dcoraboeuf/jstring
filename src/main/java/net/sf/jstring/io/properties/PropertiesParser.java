@@ -375,6 +375,8 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
             public void parse(Token token) {
                 if (token instanceof Key) {
                     cleanAndPush(SectionParser.class, new SectionKeyParser(sectionBuilder, (Key) token, Collections.<String>emptyList()));
+                } else if (token instanceof Value) {
+                    push(new ValueParser(keyBuilder, (Value) token));
                 } else if (token instanceof Blank || token instanceof Comment) {
                     cleanUntil(SectionParser.class).parse(token);
                 } else {
@@ -400,6 +402,8 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
                     cleanAndPush(BundleParser.class, new TopKeyParser((Key) token));
                 } else if (token instanceof Blank) {
                     cleanAndPush(BundleParser.class, new TopBlankParser());
+                } else if (token instanceof Value) {
+                    push(new ValueParser(keyBuilder, (Value) token));
                 } else {
                     throw createParsingException(token);
                 }
@@ -408,6 +412,37 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
             @Override
             public void close() {
                 getDefaultSectionBuilder().key(keyBuilder);
+            }
+        }
+
+        private class ValueParser extends AbstractTokenParser {
+
+            private final BundleKeyBuilder keyBuilder;
+            private final BundleValueBuilder valueBuilder;
+
+            public ValueParser(BundleKeyBuilder keyBuilder, Value value) {
+                this.keyBuilder = keyBuilder;
+                this.valueBuilder = BundleValueBuilder.create().value(value.getText());
+            }
+
+            private void add(Value value) {
+                valueBuilder.value(value.getText());
+            }
+
+            @Override
+            public void parse(Token token) {
+                if (token instanceof Value) {
+                    add((Value) token);
+                } else if (token instanceof Comment) {
+                    valueBuilder.comment(((Comment) token).getComment());
+                } else {
+                    cleanUntil(AbstractKeyParser.class).parse(token);
+                }
+            }
+
+            @Override
+            public void close() {
+                keyBuilder.value(locale, valueBuilder);
             }
         }
     }
