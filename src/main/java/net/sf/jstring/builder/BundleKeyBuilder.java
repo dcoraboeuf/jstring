@@ -5,8 +5,11 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import net.sf.jstring.model.BundleKey;
+import net.sf.jstring.model.BundleValue;
 
-import java.util.*;
+import java.util.LinkedHashMap;
+import java.util.Locale;
+import java.util.Map;
 
 public class BundleKeyBuilder extends AbstractBuilderCommented<BundleKey, BundleKeyBuilder> {
 
@@ -50,4 +53,21 @@ public class BundleKeyBuilder extends AbstractBuilderCommented<BundleKey, Bundle
         ));
 	}
 
+    @Override
+    public void merge(BundleKey source) {
+        super.merge(source);
+        ImmutableMap<Locale,BundleValue> sourceValues = source.getValues();
+        for (Map.Entry<Locale,BundleValue> sourceEntry: sourceValues.entrySet()) {
+            Locale locale = sourceEntry.getKey();
+            BundleValue sourceBundleValue = sourceEntry.getValue();
+            BundleValueBuilder value = values.get(locale);
+            if (value != null) {
+                value.merge(sourceBundleValue);
+            } else {
+                BundleValueBuilder valueBuilder = BundleValueBuilder.create();
+                valueBuilder.merge(sourceBundleValue);
+                value(locale, valueBuilder);
+            }
+        }
+    }
 }
