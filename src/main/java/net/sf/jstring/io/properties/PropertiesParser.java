@@ -243,7 +243,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
             currentParser.parse(token);
         }
 
-        private TokenParser push (TokenParser tokenParser) {
+        private TokenParser push(TokenParser tokenParser) {
             parserStack.push(tokenParser);
             trace("[properties]   + {}", tokenParser.getClass().getSimpleName());
             return tokenParser;
@@ -288,12 +288,47 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
 
         private class TopBlankParser extends AbstractTokenParser {
 
+            private final List<String> comments = new ArrayList<String>();
+
             @Override
             public void parse(Token token) {
+                if (token instanceof Blank) {
+                    // Just ignore
+                } else if (token instanceof Comment) {
+                    comments.add(((Comment) token).getComment());
+                } else if (token instanceof Section) {
+                    cleanAndPush(BundleParser.class, new SectionParser((Section) token, comments));
+                    comments.clear();
+                } else {
+                    throw createParsingException (token);
+                }
             }
 
             @Override
             public void close() {
+            }
+        }
+
+        private class SectionParser extends AbstractTokenParser {
+
+            private final BundleSectionBuilder sectionBuilder;
+
+            public SectionParser(Section token, Collection<String> comments) {
+                sectionBuilder = BundleSectionBuilder.create(token.getName());
+                for (String comment : comments) {
+                    sectionBuilder.comment(comment);
+                }
+            }
+
+            @Override
+            public void parse(Token token) {
+                // FIXME Implement net.sf.jstring.io.properties.PropertiesParser.TokensParser.SectionParser.parse
+
+            }
+
+            @Override
+            public void close() {
+                builder.section(sectionBuilder);
             }
         }
 
