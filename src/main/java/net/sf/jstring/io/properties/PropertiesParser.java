@@ -61,7 +61,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
             // Parses the URL as tokens
             List<Token> tokens = readTokens(localeURL);
             // Parses the token for this language
-            parseTokens(tokens, builder, locale, supportedLocales);
+            parseTokens(tokens, builder, locale);
             // Merge
             general.merge(builder);
         }
@@ -191,9 +191,9 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
         }
     }
 
-    private void parseTokens(List<Token> tokens, BundleBuilder builder, Locale locale, SupportedLocales supportedLocales) {
+    private void parseTokens(List<Token> tokens, BundleBuilder builder, Locale locale) {
         // Initializes the parser
-        TokensParser parser = new TokensParser (builder, locale, supportedLocales);
+        TokensParser parser = new TokensParser (builder, locale);
         // Loops through all the tokens
         for (Token token : tokens) {
             parser.parse(token);
@@ -212,13 +212,11 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
     private class TokensParser {
         private final BundleBuilder builder;
         private final Locale locale;
-        private final SupportedLocales supportedLocales;
         private final Stack<TokenParser> parserStack;
 
-        public TokensParser(BundleBuilder builder, Locale locale, SupportedLocales supportedLocales) {
+        public TokensParser(BundleBuilder builder, Locale locale) {
             this.builder = builder;
             this.locale = locale;
-            this.supportedLocales = supportedLocales;
             parserStack = new Stack<TokenParser>();
             parserStack.push(new BundleParser());
         }
