@@ -165,7 +165,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
                 return new Comment (lineno, line, comment);
             }
         } else if (startsWith(value, "[") && endsWith(value, "]")) {
-            String name = substring(value, 0, -1);
+            String name = substring(value, 1, -1);
             return new Section (lineno, line, name);
         } else if (contains(value, KEY_VALUE_SEPARATOR)) {
             String key = trim(substringBefore(value, KEY_VALUE_SEPARATOR));
