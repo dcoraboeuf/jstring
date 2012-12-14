@@ -156,7 +156,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
                     return newValue(lineno, line, comment);
                 } else if (endsWith(comment, VALUE_CONTINUATOR)) {
                     // This comment allows the values to go on
-                    return new Comment (lineno, line, comment, true);
+                    return new Comment (lineno, line, substring(comment, 0, -1), true);
                 } else {
                     // This comment ends the values
                     return new Comment (lineno, line, comment);
@@ -418,15 +418,14 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
         private class ValueParser extends AbstractTokenParser {
 
             private final BundleKeyBuilder keyBuilder;
-            private final BundleValueBuilder valueBuilder;
 
             public ValueParser(BundleKeyBuilder keyBuilder, Value value) {
                 this.keyBuilder = keyBuilder;
-                this.valueBuilder = BundleValueBuilder.create().value(value.getText());
+                this.keyBuilder.addValue(locale, readValue(value.getText()));
             }
 
             private void add(Value value) {
-                valueBuilder.value(value.getText());
+                this.keyBuilder.addValue(locale, readValue(value.getText()));
             }
 
             @Override
@@ -434,7 +433,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
                 if (token instanceof Value) {
                     add((Value) token);
                 } else if (token instanceof Comment) {
-                    valueBuilder.comment(((Comment) token).getComment());
+                	this.keyBuilder.addComment(locale, ((Comment) token).getComment());
                 } else {
                     cleanUntil(AbstractKeyParser.class).parse(token);
                 }
@@ -442,7 +441,6 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
 
             @Override
             public void close() {
-                keyBuilder.value(locale, valueBuilder);
             }
         }
     }

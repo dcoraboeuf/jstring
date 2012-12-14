@@ -34,6 +34,26 @@ public class BundleKeyBuilder extends AbstractBuilderCommented<BundleKey, Bundle
 	public String getName() {
 		return name;
 	}
+	
+	public BundleKeyBuilder addValue (Locale locale, String text) {
+		BundleValueBuilder valueBuilder = values.get(locale);
+		if (valueBuilder != null) {
+			valueBuilder.value(text);
+			return this;
+		} else {
+			return value (locale, BundleValueBuilder.text(text));
+		}
+	}
+	
+	public BundleKeyBuilder addComment (Locale locale, String comment) {
+		BundleValueBuilder valueBuilder = values.get(locale);
+		if (valueBuilder != null) {
+			valueBuilder.comment(comment);
+			return this;
+		} else {
+			return value (locale, BundleValueBuilder.create().comment(comment));
+		}
+	}
 
 	public BundleKeyBuilder value(Locale language, BundleValueBuilder value) {
 		values.put(language, value);
