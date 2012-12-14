@@ -52,9 +52,10 @@ public class BundleBuilder extends AbstractBuilderCommented<Bundle, BundleBuilde
         merge(builder.build());
     }
 
-    protected void merge(Bundle bundle) {
+    @Override
+    public void merge(Bundle bundle) {
         // Comments
-    	mergeComments(bundle.getComments());
+        mergeComments(bundle.getComments());
         // Sections
     	mergeSections(bundle.getSections());
     }

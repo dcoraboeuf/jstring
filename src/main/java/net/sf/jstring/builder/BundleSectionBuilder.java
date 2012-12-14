@@ -47,7 +47,9 @@ public class BundleSectionBuilder extends AbstractBuilderCommented<BundleSection
                 ));
 	}
 
+    @Override
 	public void merge(BundleSection section) {
+        super.merge(section);
 		// FIXME Implement BundleSectionBuilder.merge
 		
 	}

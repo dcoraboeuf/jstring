@@ -5,7 +5,7 @@ import lombok.Data;
 import com.google.common.collect.ImmutableList;
 
 @Data
-public class Bundle {
+public class Bundle implements Commented {
 
 	public static final String DEFAULT_SECTION = "default";
 	

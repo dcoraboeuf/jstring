@@ -5,7 +5,7 @@ import lombok.Data;
 import com.google.common.collect.ImmutableList;
 
 @Data
-public class BundleSection {
+public class BundleSection implements Commented {
 
 	private final String name;
 	private final ImmutableList<String> comments;

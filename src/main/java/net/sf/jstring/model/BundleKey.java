@@ -7,7 +7,7 @@ import lombok.Data;
 import java.util.Locale;
 
 @Data
-public class BundleKey {
+public class BundleKey implements Commented {
 
 	private final String name;
 	private final ImmutableList<String> comments;

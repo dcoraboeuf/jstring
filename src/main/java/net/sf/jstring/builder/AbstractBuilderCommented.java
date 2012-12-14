@@ -1,8 +1,10 @@
 package net.sf.jstring.builder;
 
+import net.sf.jstring.model.Commented;
+
 import java.util.*;
 
-public abstract class AbstractBuilderCommented<T, B extends AbstractBuilderCommented<T,B>> extends Builder<T> {
+public abstract class AbstractBuilderCommented<T extends Commented, B extends AbstractBuilderCommented<T,B>> extends Builder<T> {
 
     private final List<String> comments = new ArrayList<String>();
 
@@ -14,6 +16,12 @@ public abstract class AbstractBuilderCommented<T, B extends AbstractBuilderComme
 
     protected List<String> getComments() {
         return comments;
+    }
+
+    @Override
+    public void merge(T source) {
+        // Comments
+        mergeComments(source.getComments());
     }
 
     protected void mergeComments(Collection<String> source) {

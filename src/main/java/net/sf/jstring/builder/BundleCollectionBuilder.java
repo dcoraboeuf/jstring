@@ -29,4 +29,8 @@ public class BundleCollectionBuilder extends Builder<BundleCollection> {
 		return new BundleCollection(ImmutableList.copyOf(bundles));
 	}
 
+    @Override
+    public void merge(BundleCollection source) {
+        bundles.addAll(source.getBundles());
+    }
 }
