@@ -36,6 +36,10 @@ public class StringsLoader {
 	public static Strings auto () {
 		return new StringsLoader().load();
 	}
+
+	public static Strings auto (Locale... locales) {
+		return new StringsLoader().withLocale(new DefaultSupportedLocales(locales)).load();
+	}
 	
 	public static Strings empty () {
 		return new StringsLoader().withPaths().load();
