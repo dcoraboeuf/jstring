@@ -1,23 +1,30 @@
 package net.sf.jstring.index;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicReference;
+
 import net.sf.jstring.SupportedLocales;
-import net.sf.jstring.model.*;
+import net.sf.jstring.model.Bundle;
+import net.sf.jstring.model.BundleCollection;
+import net.sf.jstring.model.BundleKey;
+import net.sf.jstring.model.BundleSection;
+import net.sf.jstring.model.BundleValue;
+
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.Validate;
 
-import java.util.*;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReadWriteLock;
-import java.util.concurrent.locks.ReentrantReadWriteLock;
-
 public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 
-	private final ReadWriteLock indexLock = new ReentrantReadWriteLock();
-
-	private final Map<Locale, Map<String, String>> index = new HashMap<Locale, Map<String, String>>();
+	private final AtomicReference<Map<Locale, Map<String, String>>> index = new AtomicReference<Map<Locale,Map<String,String>>>(new ConcurrentHashMap<Locale, Map<String, String>>());
 
 	private final SupportedLocales supportedLocales;
-    private BundleCollection bundleCollection;
+    private final AtomicReference<BundleCollection> bundleCollection = new AtomicReference<BundleCollection>();
 
 	public DefaultIndexedBundleCollection(SupportedLocales supportedLocales) {
 		Validate.notNull(supportedLocales, "Supported locales are required");
@@ -31,37 +38,33 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 
     @Override
 	public void index(BundleCollection bundleCollection) {
-		Lock lock = indexLock.writeLock();
-		lock.lock();
-		try {
-			index.clear();
-			for (Bundle bundle : bundleCollection.getBundles()) {
-				for (BundleSection section : bundle.getSections()) {
-					for (BundleKey bundleKey : section.getKeys()) {
-						String key = bundleKey.getName();
-						for (Map.Entry<Locale, BundleValue> bundleValueEntry : bundleKey.getValues().entrySet()) {
-                            Locale language = bundleValueEntry.getKey();
-							String value = bundleValueEntry.getValue().getValue();
-							Map<String, String> languageIndex = index.get(language);
-							if (languageIndex == null) {
-								languageIndex = new HashMap<String, String>();
-								index.put(language, languageIndex);
-							}
-							languageIndex.put(key, value);
+		Map<Locale, Map<String, String>> result = new ConcurrentHashMap<Locale, Map<String,String>>();
+		for (Bundle bundle : bundleCollection.getBundles()) {
+			for (BundleSection section : bundle.getSections()) {
+				for (BundleKey bundleKey : section.getKeys()) {
+					String key = bundleKey.getName();
+					for (Map.Entry<Locale, BundleValue> bundleValueEntry : bundleKey.getValues().entrySet()) {
+                        Locale language = bundleValueEntry.getKey();
+						String value = bundleValueEntry.getValue().getValue();
+						Map<String, String> languageIndex = result.get(language);
+						if (languageIndex == null) {
+							languageIndex = new ConcurrentHashMap<String, String>();
+							result.put(language, languageIndex);
 						}
+						languageIndex.put(key, value);
 					}
 				}
 			}
-            this.bundleCollection = bundleCollection;
-		} finally {
-			lock.unlock();
 		}
+        this.bundleCollection.set(bundleCollection);
+        this.index.set(result);
 	}
 
     @Override
     public BundleCollection getBundleCollection () {
-        if (bundleCollection != null) {
-            return bundleCollection;
+    	BundleCollection result = bundleCollection.get();
+        if (result != null) {
+            return result;
         } else {
             throw new IllegalStateException("No collection was indexed yet.");
         }
@@ -69,54 +72,44 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 	
 	@Override
 	public Map<String, String> getValues(Locale locale) {
-		Lock lock = indexLock.readLock();
-		lock.lock();
-		try {
-			// Result
-			Map<String, String> result = new HashMap<String, String>();
-            // Target locale
-            Locale targetLocale = supportedLocales.filterForLookup(locale);
-			// List of locales
-			List<Locale> locales = new ArrayList<Locale>(LocaleUtils.localeLookupList(targetLocale, supportedLocales.getDefaultLocale()));
-			// Loops in reverse order
-			Collections.reverse(locales);
-			for (Locale currentLocale : locales) {
-				// Gets the language map
-				Map<String, String> map = index.get(currentLocale);
-				// If map is defined, includes it
-				if (map != null) {
-					result.putAll(map);
-				}
+		final Map<Locale, Map<String, String>> actualIndex = index.get();
+		// Result
+		Map<String, String> result = new HashMap<String, String>();
+        // Target locale
+        Locale targetLocale = supportedLocales.filterForLookup(locale);
+		// List of locales
+		List<Locale> locales = new ArrayList<Locale>(LocaleUtils.localeLookupList(targetLocale, supportedLocales.getDefaultLocale()));
+		// Loops in reverse order
+		Collections.reverse(locales);
+		for (Locale currentLocale : locales) {
+			// Gets the language map
+			Map<String, String> map = actualIndex.get(currentLocale);
+			// If map is defined, includes it
+			if (map != null) {
+				result.putAll(map);
 			}
-			// OK
-			return result;
-		} finally {
-			lock.unlock();
 		}
+		// OK
+		return result;
 	}
 
 	@Override
 	public String getValue(final Locale locale, String key) {
-		Lock lock = indexLock.readLock();
-		lock.lock();
-		try {
-            // Target locale
-            Locale targetLocale = supportedLocales.filterForLookup(locale);
-			// List of locales
-			List<Locale> locales = LocaleUtils.localeLookupList(targetLocale, supportedLocales.getDefaultLocale());
-			for (Locale currentLocale : locales) {
-				// Gets the language map
-				Map<String, String> map = index.get(currentLocale);
-				// If map is defined and contains the key
-				if (map != null && map.containsKey(key)) {
-					return map.get(key);
-				}
+		final Map<Locale, Map<String, String>> actualIndex = index.get();
+        // Target locale
+        Locale targetLocale = supportedLocales.filterForLookup(locale);
+		// List of locales
+		List<Locale> locales = LocaleUtils.localeLookupList(targetLocale, supportedLocales.getDefaultLocale());
+		for (Locale currentLocale : locales) {
+			// Gets the language map
+			Map<String, String> map = actualIndex.get(currentLocale);
+			// If map is defined and contains the key
+			if (map != null && map.containsKey(key)) {
+				return map.get(key);
 			}
-			// Nothing found
-			return null;
-		} finally {
-			lock.unlock();
 		}
+		// Nothing found
+		return null;
 	}
 
 }
