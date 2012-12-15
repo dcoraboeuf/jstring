@@ -58,6 +58,11 @@ public class DefaultStrings implements Strings {
     	this.fallback = fallback;
     	this.formatter = formatter;
     }
+    
+    @Override
+    public boolean reload() {
+    	return indexedBundleCollection.reload();
+    }
 
     @Override
     public BundleCollection getBundleCollection() {

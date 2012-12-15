@@ -8,6 +8,7 @@ import net.sf.jstring.Formatter;
 import net.sf.jstring.builder.BundleCollectionBuilder;
 import net.sf.jstring.index.DefaultIndexedBundleCollection;
 import net.sf.jstring.index.IndexedBundleCollection;
+import net.sf.jstring.index.IndexedBundleCollectionOwner;
 import net.sf.jstring.io.DefaultParserFactory;
 import net.sf.jstring.io.Parser;
 import net.sf.jstring.io.ParserFactory;
@@ -25,7 +26,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.*;
 
-public class StringsLoader {
+public class StringsLoader implements IndexedBundleCollectionOwner {
 	
 	private static final String CATALOGUE_PATH = "META-INF/strings/catalogue";
 
@@ -111,6 +112,16 @@ public class StringsLoader {
 	public StringsLoader withTraces() {
 		return new StringsLoader(parserFactory, formatter, fallback, supportedLocales, false, ImmutableList.copyOf(paths), true);
 	}
+	
+	@Override
+	public boolean reload(IndexedBundleCollection indexedBundleCollection) {
+		// Loads the collection of bundles
+		BundleCollection bundleCollection = loadBundleCollection();
+		// Reload
+		indexedBundleCollection.index(bundleCollection);
+		// OK
+		return true;
+	}
 
 	public Strings load() {
 		
@@ -120,6 +131,18 @@ public class StringsLoader {
         logger.info("[strings] Supported locales are {}", supportedLocales.getSupportedLocales());
 		Locale.setDefault(defaultLocale);
 		
+		// Loads the collection of bundles
+		BundleCollection collection = loadBundleCollection();
+		
+		// Indexation of the collection
+		IndexedBundleCollection indexedCollection = new DefaultIndexedBundleCollection(supportedLocales, this);
+		indexedCollection.index(collection);
+
+		// Returns some strings
+		return new DefaultStrings(indexedCollection, fallback, formatter);
+	}
+
+	protected BundleCollection loadBundleCollection() {
 		// Adds all properties in META-INF/strings/catalogue
 		Collection<URL> paths;
 		if (autoDiscover) {
@@ -161,13 +184,7 @@ public class StringsLoader {
 		
 		// Gets the final bundle collection
 		BundleCollection collection = collectionBuilder.build();
-		
-		// Indexation of the collection
-		IndexedBundleCollection indexedCollection = new DefaultIndexedBundleCollection(supportedLocales);
-		indexedCollection.index(collection);
-
-		// Returns some strings
-		return new DefaultStrings(indexedCollection, fallback, formatter);
+		return collection;
 	}
 
 	protected Set<URL> discover() throws IOException, MalformedURLException {

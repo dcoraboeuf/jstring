@@ -24,16 +24,23 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 	private final AtomicReference<Map<Locale, Map<String, String>>> index = new AtomicReference<Map<Locale,Map<String,String>>>(new ConcurrentHashMap<Locale, Map<String, String>>());
 
 	private final SupportedLocales supportedLocales;
+	private final IndexedBundleCollectionOwner owner;
     private final AtomicReference<BundleCollection> bundleCollection = new AtomicReference<BundleCollection>();
 
-	public DefaultIndexedBundleCollection(SupportedLocales supportedLocales) {
+	public DefaultIndexedBundleCollection(SupportedLocales supportedLocales, IndexedBundleCollectionOwner owner) {
 		Validate.notNull(supportedLocales, "Supported locales are required");
 		this.supportedLocales = supportedLocales;
+		this.owner = owner;
 	}
 
     @Override
     public SupportedLocales getSupportedLocales() {
         return supportedLocales;
+    }
+    
+    @Override
+    public boolean reload() {
+    	return owner.reload(this);
     }
 
     @Override

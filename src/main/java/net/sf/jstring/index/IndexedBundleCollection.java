@@ -18,4 +18,6 @@ public interface IndexedBundleCollection {
 
 	Map<String, String> getValues(Locale locale);
 
+	boolean reload();
+
 }

@@ -56,5 +56,11 @@ public interface Strings {
      * Gets the underlying bundle collection
      */
     BundleCollection getBundleCollection();
+    
+    /**
+     * Reloads the strings from their source.
+     * @return <code>true</code> if the reload was successful.
+     */
+    boolean reload();
 
 }
