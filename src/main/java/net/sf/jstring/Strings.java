@@ -19,7 +19,6 @@ public interface Strings {
      * @param key   Code of the string
      * @param params Parameters for the string
      * @return Corresponding string
-     * @see #get(java.util.Locale, String, boolean)
      */
     String get(Locale locale, Object key, Object... params);
 
@@ -30,7 +29,6 @@ public interface Strings {
      * @param key   Code of the string
      * @param params Parameters for the string
      * @return Corresponding string
-     * @see #get(java.util.Locale, String, boolean)
      */
     String get(Locale locale, Object key, Map<String, ?> params);
 
@@ -56,6 +54,11 @@ public interface Strings {
      * Gets the underlying bundle collection
      */
     BundleCollection getBundleCollection();
+
+    /**
+     * Gets the associated supported locales
+     */
+    SupportedLocales getSupportedLocales();
     
     /**
      * Reloads the strings from their source.

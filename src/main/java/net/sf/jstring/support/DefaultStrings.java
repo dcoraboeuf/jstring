@@ -2,10 +2,7 @@ package net.sf.jstring.support;
 
 import com.google.common.base.Function;
 import com.google.common.collect.Maps;
-import net.sf.jstring.Fallback;
-import net.sf.jstring.Formatter;
-import net.sf.jstring.Localizable;
-import net.sf.jstring.Strings;
+import net.sf.jstring.*;
 import net.sf.jstring.index.IndexedBundleCollection;
 import net.sf.jstring.model.BundleCollection;
 import org.apache.commons.lang3.Validate;
@@ -68,7 +65,12 @@ public class DefaultStrings implements Strings {
     public BundleCollection getBundleCollection() {
         return indexedBundleCollection.getBundleCollection();
     }
-    
+
+    @Override
+    public SupportedLocales getSupportedLocales() {
+        return indexedBundleCollection.getSupportedLocales();
+    }
+
     @Override
     public String get(Locale locale, Object key, Object... params) {
     	Map<String, Object> map = new LinkedHashMap<String, Object>();
