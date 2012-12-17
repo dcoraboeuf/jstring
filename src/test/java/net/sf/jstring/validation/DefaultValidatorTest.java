@@ -7,6 +7,8 @@ import org.junit.Test;
 
 import java.util.Locale;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 
 public class DefaultValidatorTest {
@@ -16,6 +18,8 @@ public class DefaultValidatorTest {
         Strings strings = new StringsLoader().withPaths("test/ls/sample.ls").withLocale(Locale.FRENCH).load();
         ValidationResult result = new DefaultValidator().validate(strings);
         assertNotNull (result);
+        assertFalse(result.hasErrors());
+        assertFalse(result.hasWarnings());
     }
 
 }

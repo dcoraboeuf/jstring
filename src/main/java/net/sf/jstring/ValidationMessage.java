@@ -1,6 +1,6 @@
 package net.sf.jstring;
 
-public interface ValidationMessage {
+public interface ValidationMessage extends Localizable {
 
     ValidationMessageCategory getCategory();
 

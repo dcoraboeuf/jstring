@@ -1,8 +1,11 @@
 package net.sf.jstring;
 
+import static net.sf.jstring.ValidationMessageType.ERROR;
+
 public enum ValidationMessageCategory {
 
-    MISSING_KEY_IN_LANGUAGE (ValidationMessageType.ERROR);
+    MISSING_KEY_IN_LANGUAGE (ERROR),
+    MISSING_LOCALE(ERROR);
 
     private final ValidationMessageType type;
 
