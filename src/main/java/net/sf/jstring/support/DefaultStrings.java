@@ -182,11 +182,21 @@ public class DefaultStrings implements Strings {
     @Override
     public synchronized Map<String, String> getKeyValues(Locale locale) {
         // Default locale is null
+        final Locale targetLocale;
         if (locale == null) {
-            locale = indexedBundleCollection.getSupportedLocales().getDefaultLocale();
+            targetLocale = indexedBundleCollection.getSupportedLocales().getDefaultLocale();
+        } else {
+            targetLocale = locale;
         }
         // Gets all values
         Map<String, String> map = indexedBundleCollection.getValues (locale);
+        // Resolve the recursivity
+        map = Maps.transformValues(map, new Function<String, String>() {
+            @Override
+            public String apply(String s) {
+                return resolve(targetLocale, s);
+            }
+        });
         // OK
         return map;
     }
