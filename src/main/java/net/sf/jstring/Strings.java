@@ -65,5 +65,12 @@ public interface Strings {
      * @return <code>true</code> if the reload was successful.
      */
     boolean reload();
+    
+    /**
+     * Returns the last update time.
+     * @return Last update time in ms (see {@link System#currentTimeMillis()}.
+     * @see System#currentTimeMillis()
+     */
+    long getLastUpdateTime();
 
 }

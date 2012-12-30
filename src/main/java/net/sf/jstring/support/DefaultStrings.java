@@ -60,6 +60,11 @@ public class DefaultStrings implements Strings {
     public boolean reload() {
     	return indexedBundleCollection.reload();
     }
+    
+    @Override
+    public long getLastUpdateTime() {
+    	return indexedBundleCollection.getLastUpdateTime();
+    }
 
     @Override
     public BundleCollection getBundleCollection() {

@@ -26,6 +26,8 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 	private final SupportedLocales supportedLocales;
 	private final IndexedBundleCollectionOwner owner;
     private final AtomicReference<BundleCollection> bundleCollection = new AtomicReference<BundleCollection>();
+    
+    private long lastUpdateTime = -1L;
 
 	public DefaultIndexedBundleCollection(SupportedLocales supportedLocales, IndexedBundleCollectionOwner owner) {
 		Validate.notNull(supportedLocales, "Supported locales are required");
@@ -41,6 +43,11 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
     @Override
     public boolean reload() {
     	return owner.reload(this);
+    }
+    
+    @Override
+    public long getLastUpdateTime() {
+    	return lastUpdateTime;
     }
 
     @Override
@@ -65,6 +72,7 @@ public class DefaultIndexedBundleCollection implements IndexedBundleCollection {
 		}
         this.bundleCollection.set(bundleCollection);
         this.index.set(result);
+        this.lastUpdateTime = System.currentTimeMillis();
 	}
 
     @Override
