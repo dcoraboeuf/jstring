@@ -117,7 +117,10 @@ public class DefaultSupportedLocalesTest {
         assertEquals(ENGLISH, locales.filterForLookup(Locale.FRANCE));
         assertEquals(FRENCH, locales.filterForLookup(Locale.FRENCH));
         assertEquals(ENGLISH, locales.filterForLookup(Locale.ENGLISH));
+        assertEquals(ENGLISH, locales.filterForLookup(Locale.UK));
         assertEquals(ENGLISH, locales.filterForLookup(Locale.ITALIAN));
+        assertEquals(ENGLISH, locales.filterForLookup(Locale.ITALY));
+        assertEquals(ENGLISH, locales.filterForLookup(Locale.GERMANY));
     }
 
     @Test
@@ -126,7 +129,10 @@ public class DefaultSupportedLocalesTest {
         assertEquals(FRENCH, locales.filterForLookup(Locale.FRANCE));
         assertEquals(FRENCH, locales.filterForLookup(Locale.FRENCH));
         assertEquals(ENGLISH, locales.filterForLookup(Locale.ENGLISH));
+        assertEquals(ENGLISH, locales.filterForLookup(Locale.UK));
         assertEquals(ENGLISH, locales.filterForLookup(Locale.ITALIAN));
+        assertEquals(ENGLISH, locales.filterForLookup(Locale.ITALY));
+        assertEquals(ENGLISH, locales.filterForLookup(Locale.GERMANY));
     }
 
     @Test(expected = UnsupportedLocaleException.class)

@@ -5,14 +5,10 @@ import net.sf.jstring.LocalePolicy;
 import net.sf.jstring.SupportedLocales;
 import org.apache.commons.lang3.LocaleUtils;
 import org.apache.commons.lang3.Validate;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 
 public class DefaultSupportedLocales implements SupportedLocales {
-
-    private final Logger logger = LoggerFactory.getLogger(SupportedLocales.class);
 
     private final ImmutableList<Locale> locales;
     private final LocalePolicy localeParsingPolicy;
@@ -53,12 +49,11 @@ public class DefaultSupportedLocales implements SupportedLocales {
         if (locales.contains(locale)) {
             return locale;
         } else {
-            logger.warn("[locales] Locale {} is not supported", locale);
             switch (policy) {
                 case EXTENDS:
                     List<Locale> candidates = LocaleUtils.localeLookupList(locale, getDefaultLocale());
                     if (candidates.size() > 1) {
-                        return filterForParsing(candidates.get(1));
+                        return filter(candidates.get(1), policy);
                     } else {
                         return getDefaultLocale();
                     }
