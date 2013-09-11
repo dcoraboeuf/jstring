@@ -38,6 +38,15 @@ public class BundleSectionBuilder extends AbstractBuilderCommented<BundleSection
 		return this;
 	}
 
+    public BundleKeyBuilder key (String name) {
+        BundleKeyBuilder bundleKeyBuilder = keys.get(name);
+        if (bundleKeyBuilder == null) {
+            bundleKeyBuilder = BundleKeyBuilder.create(name);
+            key(bundleKeyBuilder);
+        }
+        return bundleKeyBuilder;
+    }
+
 	@Override
 	public BundleSection build() {
 		return new BundleSection(
