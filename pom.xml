@@ -4,7 +4,7 @@
 
 	<groupId>net.sf.jstring</groupId>
 	<artifactId>jstring</artifactId>
-	<version>2.5</version>
+	<version>2.6-SNAPSHOT</version>
 
 	<name>JString</name>
 	<description>Multi-resource bundle</description>
@@ -30,7 +30,7 @@
 		<connection>scm:git:git@github.com:dcoraboeuf/jstring.git</connection>
 		<url>scm:git:git@github.com:dcoraboeuf/jstring.git</url>
 		<developerConnection>scm:git:git@github.com:dcoraboeuf/jstring.git</developerConnection>
-	  <tag>jstring-2.5</tag>
+	  <tag>HEAD</tag>
   </scm>
 
 	<distributionManagement>
