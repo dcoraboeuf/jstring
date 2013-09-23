@@ -58,21 +58,21 @@ public class BundleSectionBuilder extends AbstractBuilderCommented<BundleSection
 	}
 
     @Override
-	public void merge(BundleSection section) {
-        super.merge(section);
+	public void merge(BundleSection section, BundleValueMergeMode mode) {
+        super.merge(section, mode);
 		// Keys
-		mergeKeys(section.getKeys());
+		mergeKeys(section.getKeys(), mode);
 	}
 
-    private void mergeKeys(ImmutableList<BundleKey> sourceKeys) {
+    private void mergeKeys(ImmutableList<BundleKey> sourceKeys, BundleValueMergeMode mode) {
         for (BundleKey sourceKey : sourceKeys) {
             String name = sourceKey.getName();
             BundleKeyBuilder key = keys.get(name);
             if (key != null) {
-                key.merge(sourceKey);
+                key.merge(sourceKey, mode);
             } else {
                 BundleKeyBuilder keyBuilder = BundleKeyBuilder.create(name);
-                keyBuilder.merge(sourceKey);
+                keyBuilder.merge(sourceKey, mode);
                 key(keyBuilder);
             }
         }

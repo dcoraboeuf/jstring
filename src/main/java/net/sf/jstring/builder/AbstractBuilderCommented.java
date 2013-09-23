@@ -19,7 +19,7 @@ public abstract class AbstractBuilderCommented<T extends Commented, B extends Ab
     }
 
     @Override
-    public void merge(T source) {
+    public void merge(T source, BundleValueMergeMode mode) {
         // Comments
         mergeComments(source.getComments());
     }

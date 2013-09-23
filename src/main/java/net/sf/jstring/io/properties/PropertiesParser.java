@@ -1,10 +1,7 @@
 package net.sf.jstring.io.properties;
 
 import net.sf.jstring.SupportedLocales;
-import net.sf.jstring.builder.BundleBuilder;
-import net.sf.jstring.builder.BundleKeyBuilder;
-import net.sf.jstring.builder.BundleSectionBuilder;
-import net.sf.jstring.builder.BundleValueBuilder;
+import net.sf.jstring.builder.*;
 import net.sf.jstring.io.AbstractParser;
 import net.sf.jstring.io.CannotOpenException;
 import net.sf.jstring.io.CannotParseException;
@@ -63,7 +60,7 @@ public class PropertiesParser extends AbstractParser<PropertiesParser> {
             // Parses the token for this language
             parseTokens(tokens, builder, locale);
             // Merge
-            general.merge(builder);
+            general.merge(builder, BundleValueMergeMode.APPEND);
         }
 
         // Bundle

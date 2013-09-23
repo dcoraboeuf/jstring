@@ -48,27 +48,27 @@ public class BundleBuilder extends AbstractBuilderCommented<Bundle, BundleBuilde
     	}
     }
 
-    public void merge(BundleBuilder builder) {
-        merge(builder.build());
+    public void merge(BundleBuilder builder, BundleValueMergeMode mode) {
+        merge(builder.build(), mode);
     }
 
     @Override
-    public void merge(Bundle bundle) {
+    public void merge(Bundle bundle, BundleValueMergeMode mode) {
         // Comments
         mergeComments(bundle.getComments());
         // Sections
-    	mergeSections(bundle.getSections());
+    	mergeSections(bundle.getSections(), mode);
     }
 
-    private void mergeSections(ImmutableList<BundleSection> sourceSections) {
+    private void mergeSections(ImmutableList<BundleSection> sourceSections, BundleValueMergeMode mode) {
     	for (BundleSection sourceSection : sourceSections) {
 			String name = sourceSection.getName();
 			BundleSectionBuilder section = sections.get(name);
 			if (section != null) {
-				section.merge(sourceSection);
+				section.merge(sourceSection, mode);
 			} else {
 				BundleSectionBuilder sectionBuilder = BundleSectionBuilder.create(name);
-				sectionBuilder.merge(sourceSection);
+				sectionBuilder.merge(sourceSection, mode);
 				section(sectionBuilder);
 			}
 		}

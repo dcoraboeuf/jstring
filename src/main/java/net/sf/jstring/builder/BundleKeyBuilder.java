@@ -74,18 +74,18 @@ public class BundleKeyBuilder extends AbstractBuilderCommented<BundleKey, Bundle
 	}
 
     @Override
-    public void merge(BundleKey source) {
-        super.merge(source);
+    public void merge(BundleKey source, BundleValueMergeMode mode) {
+        super.merge(source, mode);
         ImmutableMap<Locale,BundleValue> sourceValues = source.getValues();
         for (Map.Entry<Locale,BundleValue> sourceEntry: sourceValues.entrySet()) {
             Locale locale = sourceEntry.getKey();
             BundleValue sourceBundleValue = sourceEntry.getValue();
             BundleValueBuilder valueBuilder = values.get(locale);
             if (valueBuilder != null) {
-                valueBuilder.merge(sourceBundleValue);
+                valueBuilder.merge(sourceBundleValue, mode);
             } else {
                 valueBuilder = BundleValueBuilder.create();
-                valueBuilder.merge(sourceBundleValue);
+                valueBuilder.merge(sourceBundleValue, mode);
                 value(locale, valueBuilder);
             }
         }

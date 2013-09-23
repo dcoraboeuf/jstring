@@ -30,7 +30,7 @@ public class BundleCollectionBuilder extends Builder<BundleCollection> {
 	}
 
     @Override
-    public void merge(BundleCollection source) {
+    public void merge(BundleCollection source, BundleValueMergeMode mode) {
         bundles.addAll(source.getBundles());
     }
 }
