@@ -14,7 +14,7 @@ tasks.withType(Compile) {
 }
 
 repositories {
-     maven { url "http://repo.maven.apache.org/maven2" }
+    mavenCentral()
 }
 
 dependencies {
