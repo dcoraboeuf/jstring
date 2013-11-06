@@ -1,0 +1,30 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+group = 'net.sf.jstring'
+version = '2.8-SNAPSHOT'
+
+description = """JString"""
+
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+tasks.withType(Compile) {
+	options.encoding = 'UTF-8'
+}
+
+repositories {
+     maven { url "http://repo.maven.apache.org/maven2" }
+}
+
+dependencies {
+    compile group: 'org.slf4j', name: 'slf4j-api', version:'1.6.1'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version:'3.1'
+    compile group: 'commons-io', name: 'commons-io', version:'2.4'
+    compile group: 'com.google.guava', name: 'guava', version:'13.0.1'
+    compile group: 'org.projectlombok', name: 'lombok', version:'0.11.4'
+    testCompile group: 'junit', name: 'junit', version:'4.8.1'
+    testCompile group: 'org.mockito', name: 'mockito-core', version:'1.8.5'
+    testCompile group: 'org.slf4j', name: 'slf4j-log4j12', version:'1.6.1'
+    testCompile group: 'log4j', name: 'log4j', version:'1.2.13'
+}
