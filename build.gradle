@@ -1,5 +1,4 @@
 apply plugin: 'java'
-apply plugin: 'maven'
 
 group = 'net.sf.jstring'
 version = '2.8-SNAPSHOT'
